@@ -1,3 +1,4 @@
 # specific gitignore for this directory
-data/
 !data/README.md
+data/
+
