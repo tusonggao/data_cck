@@ -5,9 +5,11 @@ tsg_personal/
 *.html
 
 
-# OGeek
-OGeek/data/*.*
+# OGeek directory
+OGeek/data/*
 !OGeek/data/README.md
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
