@@ -1,6 +1,5 @@
 # my added file types
 tsg_personal/
-data/
 *.mylogs
 *.tsg
 *.html
