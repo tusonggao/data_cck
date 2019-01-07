@@ -6,7 +6,7 @@ tsg_personal/
 
 
 # OGeek
-OGeek/data/
+OGeek/data/*.*
 !OGeek/data/README.md
 
 # Byte-compiled / optimized / DLL files
