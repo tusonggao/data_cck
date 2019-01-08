@@ -23,6 +23,8 @@ from sklearn.model_selection import train_test_split
 # features:
 # 1. 价格
 # 2. 商品类别
+# 3. 商品名字的长度
+
 # 3. 商家的平均销售数量
 # 4. 该商品的平均销售数量
 # 5. 该商家某个类别的总销量
@@ -32,10 +34,12 @@ from sklearn.model_selection import train_test_split
 random_seed = 42
 np.random.seed(random_seed)
 
+# def rmse(y_true, y_predict):
+#     return np.sqrt(np.mean((y_true - y_predict) ** 2))
 
-def rmse(y_true, y_predict):
-    return np.sqrt(np.mean((y_true - y_predict) ** 2))
-
+def rmse(y_true, y_pred):
+    y_pred = np.where(y_pred>0, y_pred, 0)
+    return 'RMSE', np.sqrt(mean_squared_error(y_true, y_pred)), False
 
 def convert_2_md5(value):
     return hashlib.md5(str(value).encode('utf-8')).hexdigest()
@@ -109,24 +113,102 @@ print('hello world')
 
 # df_merged = pd.read_csv('./data/hive_sql_merged_instances_comma.csv')
 
-df_train = pd.read_csv('./data/sales_train_v2.csv', dtype={'item_id': str, 'shop_id': str})
+# df_train = pd.read_csv('./data/sales_train_v2.csv', dtype={'item_id': str, 'shop_id': str})
+df_train = pd.read_csv('./data/sales_train_v2.csv')
 df_train.drop(['date', 'date_block_num'], axis=1, inplace=True)
 
-df_test = pd.read_csv('./data/test.csv', dtype={'item_id': str, 'shop_id': str}, index_col=0)
+# df_test = pd.read_csv('./data/test.csv', dtype={'item_id': str, 'shop_id': str}, index_col=0)
+df_test = pd.read_csv('./data/test.csv')
+df_test_ID = df_test['ID']
+df_test.drop(['ID'], axis=1, inplace=True)
 
-df_item_price = df_train[['item_id', 'item_price']].groupby('item_id').apply(avg)
+df_item_price = df_train[['item_id', 'item_price']].groupby('item_id').agg({'item_price': np.average})
+df_item_price = df_item_price.reset_index()
 
-df_test = pd.merge(df_test, df_train[['item_id', 'item_price']], how='left', on=['item_id'])
+print('df_item_price.shape is ', df_item_price.shape,
+      'df_item_price.head(10)', df_item_price.head(10))
 
+# groupby('sex').agg({'tip': np.max, 'total_bill': np.sum})
+
+print('before df_test.shape is ', df_test.shape,
+      'before df_test.head(10)', df_test.head(10))
+
+
+df_test = pd.merge(df_test, df_item_price, how='left', on=['item_id'])
+print('after df_test.shape is ', df_test.shape,
+      'after df_test.head(10)', df_test.head(10))
+
+# df_train = df_train.sample(frac=0.01)
+# df_test = df_test.sample(frac=0.1)
+df_merged = pd.concat([df_train, df_test])
+
+print('df_train.shape is ', df_train.shape, 'df_test.shape', df_test.shape,
+      'df_merged.shape is', df_merged.shape)
+
+
+# df_items = pd.read_csv('./data/items.csv', dtype={'item_category_id': str})
 df_items = pd.read_csv('./data/items.csv')
-df_item_categories = pd.read_csv('./data/item_categories.csv')
+df_items['item_name_len'] = df_items['item_name'].str.len()
+df_items.drop(['item_name'], axis=1, inplace=True)
 
+df_merged = pd.merge(df_merged, df_items, how='left', on=['item_id'])
 
-print('df_train.shape is ', df_train.shape,
-      'df_train.head(10)', df_train.head(10))
+print('before get_dummies df_merged.shape is ', df_merged.shape)
 
-print('df_test.shape is ', df_test.shape,
-      'df_test.head(10)', df_test.head(10))
+df_merged = pd.get_dummies(df_merged)
+
+print('after get_dummies df_merged.shape is ', df_merged.shape)
+
+df_train = df_merged[df_merged['item_cnt_day'].notnull()]
+df_test = df_merged[df_merged['item_cnt_day'].isnull()]
+
+print('after df_merged.shape is ', df_merged.shape,
+      'df_train.shape is ', df_train.shape,
+      'df_test.shape is', df_test.shape)
+
+df_train['rand_v'] = np.random.rand(df_train.shape[0])
+
+df_train_train = df_train[df_train['rand_v']<=0.8]
+df_y_train_train = df_train_train['item_cnt_day']
+df_X_train_train = df_train_train.drop(['item_cnt_day', 'rand_v'], axis=1)
+
+df_train_val = df_train[df_train['rand_v']>0.8]
+df_y_train_val = df_train_val['item_cnt_day']
+df_X_train_val = df_train_val.drop(['item_cnt_day', 'rand_v'], axis=1)
+
+# df_train_y = df_train['item_cnt_day']
+# df_train_X = df_train.drop(['item_cnt_day'], axis=1)
+
+df_test_X = df_test.drop(['item_cnt_day'], axis=1)
+
+# df_item_categories = pd.read_csv('./data/item_categories.csv')
+
+lgbm_param = {'n_estimators':500, 'n_jobs':-1, 'learning_rate':0.05,
+              'random_state':42, 'max_depth':7, 'min_child_samples':21,
+              'num_leaves':300, 'subsample':0.7, 'colsample_bytree':0.85,
+              'silent':-1, 'verbose':-1}
+lgbm = lgb.LGBMRegressor(**lgbm_param)
+lgbm.fit(df_X_train_train, df_y_train_train, eval_set=[(df_X_train_train, df_y_train_train),
+        (df_X_train_val, df_y_train_val)], eval_metric=rmse,
+        verbose=200, early_stopping_rounds=600)
+
+y_predict = lgbm.predict(df_test_X)
+
+df_outcome = pd.DataFrame()
+df_outcome['ID'] = df_test_ID['ID']
+df_outcome['item_cnt_month'] = y_predict
+
+df_outcome.to_csv('./outcome/submission1.csv', index=0)
+
+# print('df_item_price.shape is ', df_item_price.shape,
+#       'df_item_price.head(10)', df_item_price.head(10))
+#
+# print('df_train.shape is ', df_train.shape,
+#       'df_train.head(10)', df_train.head(10))
+#
+#
+# print('df_test.shape is ', df_test.shape,
+#       'df_test.head(10)', df_test.head(10))
 
 
 # shop_id,item_id
@@ -134,13 +216,11 @@ print('df_test.shape is ', df_test.shape,
 # print('df_items.shape is ', df_items.shape,
 #       'df_items.head(10)', df_items.head(10))
 
-# df_merged = pd.concat([df_train, df_test])
 
 # print('df_item_categories.shape is ', df_item_categories.shape,
 #       'df_item_categories.head(10)', df_item_categories.head(10))
-
+#
 # print('df_item_categories.dtypes is ', df_item_categories.dtypes)
-
 
 
 
