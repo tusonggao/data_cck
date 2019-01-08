@@ -109,19 +109,27 @@ print('hello world')
 
 # df_merged = pd.read_csv('./data/hive_sql_merged_instances_comma.csv')
 
-df_train = pd.read_csv('./data/sales_train_v2.csv')
+df_train = pd.read_csv('./data/sales_train_v2.csv', dtype={'item_id': str, 'shop_id': str})
 df_train.drop(['date', 'date_block_num'], axis=1, inplace=True)
 
-df_test = pd.read_csv('./data/test.csv', index_col=0)
+df_test = pd.read_csv('./data/test.csv', dtype={'item_id': str, 'shop_id': str}, index_col=0)
+
+df_item_price = df_train[['item_id', 'item_price']].groupby('item_id').apply(avg)
+
+df_test = pd.merge(df_test, df_train[['item_id', 'item_price']], how='left', on=['item_id'])
 
 df_items = pd.read_csv('./data/items.csv')
 df_item_categories = pd.read_csv('./data/item_categories.csv')
+
 
 print('df_train.shape is ', df_train.shape,
       'df_train.head(10)', df_train.head(10))
 
 print('df_test.shape is ', df_test.shape,
       'df_test.head(10)', df_test.head(10))
+
+
+# shop_id,item_id
 
 # print('df_items.shape is ', df_items.shape,
 #       'df_items.head(10)', df_items.head(10))
