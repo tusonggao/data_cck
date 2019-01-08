@@ -166,7 +166,7 @@ print('after df_merged.shape is ', df_merged.shape,
       'df_train.shape is ', df_train.shape,
       'df_test.shape is', df_test.shape)
 
-df_train['rand_v'] = np.random.rand(df_train.shape[0])
+df_train.loc[:, 'rand_v'] = np.random.rand(df_train.shape[0])
 
 df_train_train = df_train[df_train['rand_v']<=0.8]
 df_y_train_train = df_train_train['item_cnt_day']
@@ -183,19 +183,19 @@ df_test_X = df_test.drop(['item_cnt_day'], axis=1)
 
 # df_item_categories = pd.read_csv('./data/item_categories.csv')
 
-lgbm_param = {'n_estimators':500, 'n_jobs':-1, 'learning_rate':0.05,
+lgbm_param = {'n_estimators':500, 'n_jobs':-1, 'learning_rate':0.08,
               'random_state':42, 'max_depth':7, 'min_child_samples':21,
-              'num_leaves':300, 'subsample':0.7, 'colsample_bytree':0.85,
+              'num_leaves':300, 'subsample':0.8, 'colsample_bytree':0.8,
               'silent':-1, 'verbose':-1}
 lgbm = lgb.LGBMRegressor(**lgbm_param)
 lgbm.fit(df_X_train_train, df_y_train_train, eval_set=[(df_X_train_train, df_y_train_train),
         (df_X_train_val, df_y_train_val)], eval_metric=rmse,
-        verbose=200, early_stopping_rounds=600)
+        verbose=100, early_stopping_rounds=1000)
 
 y_predict = lgbm.predict(df_test_X)
 
 df_outcome = pd.DataFrame()
-df_outcome['ID'] = df_test_ID['ID']
+df_outcome['ID'] = df_test_ID
 df_outcome['item_cnt_month'] = y_predict
 
 df_outcome.to_csv('./outcome/submission1.csv', index=0)
