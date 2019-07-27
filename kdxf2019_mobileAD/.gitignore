@@ -4,6 +4,12 @@ tsg_personal/
 *.tsg
 *.html
 
+
+# 数据和提交结果目录
+data/
+submission/
+
+
 # npp temp directory
 nppBackup/
 
