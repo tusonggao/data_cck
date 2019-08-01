@@ -4,6 +4,9 @@ tsg_personal/
 *.tsg
 *.html
 
+# notepad++ bakup directory
+nppBackup/
+
 
 # OGeek directory
 OGeek/data/*

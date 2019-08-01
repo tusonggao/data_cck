@@ -1,8 +1,9 @@
 import os
 import sys
+import string
 import time
+import random
 import datetime
-
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
@@ -12,14 +13,54 @@ from sklearn.feature_extraction.text import CountVectorizer
 from scipy import sparse
 import lightgbm as lgb
 
-
-def generate_muffle_files():
-    file_name_len = 16
-    file_num = 9
-    for
-
 current_path = os.path.split(os.path.realpath(__file__))[0]
 # current_path = 'F:/github_me_repos/data_competition/kdxf2019_mobileAD/'
+os.chdir(current_path)
+
+def generate_muffle_files(file_num=100):
+    start_t = time.time()
+
+    def file_number_under_path(dirname):
+        result = []  # 所有的文件
+        for maindir, subdir, file_name_list in os.walk(dirname):
+            for filename in file_name_list:
+                file_path = os.path.join(maindir, filename)  # 合并成一个完整路径
+                result.append(file_path)
+        return len(result)
+
+    def gen_content(line_num=25):
+        candidate_chs = string.digits + string.ascii_letters
+        content = ''
+        for i in range(line_num):
+            content += ''.join(random.choices(candidate_chs, k=120)) + '\n'
+        # print('content is ', content)
+        return content
+
+    def gen_rand_file(file_name_len=16):
+        all_candidate_chs = string.digits + string.ascii_letters
+        upper_letters = ''.join(set(string.ascii_uppercase) - set('AGMS'))
+        print('upper_letters is ', upper_letters)
+        print(all_candidate_chs)
+        file_name = ''
+        for i in range(file_name_len):
+            if i<=2:
+                file_name += random.choice(upper_letters)
+            else:
+                file_name += random.choice(all_candidate_chs)
+        print('file_name is ', file_name)
+        with open(current_path + '/temp_data/' + file_name + '.txt', 'w') as file:
+            file.write(gen_content())
+        return file_name
+
+    # print('file_number is ', file_number_under_path(current_path + '/temp_data/'))
+
+    for i in range(file_num):
+        gen_rand_file()
+    print('generate_muffle_files cost time ', time.time()-start_t)
+
+generate_muffle_files()
+
+sys.exit(0)
 
 df_train = pd.read_csv(current_path + '/data/round1_iflyad_anticheat_traindata.txt', sep='\t')
 print('df_train.shape is ', df_train.shape, df_train.head(10), list(df_train.columns))  # (1000000, 29)

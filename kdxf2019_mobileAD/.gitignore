@@ -7,8 +7,9 @@ tsg_personal/
 
 # 数据和提交结果目录
 data/
+temp_data/
 submission/
-
+gjxm/
 
 
 # npp temp directory
