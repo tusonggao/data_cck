@@ -11,7 +11,6 @@ extra_cost_for_each_member = {0:0, 1:0, 2:9, 3:9, 4:9, 5:18, 6:18, 7:36, 8:36, 9
 data = pd.read_csv('./atad/family_data.csv')
 data = data.sort_values(by='n_people', ascending=False)
 family_ids_sorted = list(data['family_id'].values)
-#print('family_ids_sorted is ', family_ids_sorted)
 
 choices, choices_reversed, family_people_num = {}, {}, {}
 with open('./atad/family_data.csv') as file_r:
@@ -65,59 +64,53 @@ def generate_random_assignment():
 def generate_BF_assignment():
     assignment_min, score_min = {}, float('inf')
     true_total_cnt, false_total_cnt = 0, 0
-    days_people_num_for_check = {i:0 for i in range(1, 101, 1)}
+    days_people_num_for_quickcheck = {i:0 for i in range(1, 101, 1)}
     assignment = {}
+
     def generate_BF_assignment_inner(idx):
-        nonlocal true_total_cnt, false_total_cnt
-        if true_total_cnt >= 10:
-            return
+        nonlocal true_total_cnt, false_total_cnt, days_people_num_for_quickcheck, assignment
+        #if true_total_cnt >= 10:
+        #    return
         family_id = family_ids_sorted[idx]
         for i in range(10):
-            assignment[family_id] = choices[family_id][i]
-            days_people_num_for_check[family_id] += family_people_num[family_id]
+            choice_day = choices[family_id][i]
+            assignment[family_id] = choice_day
+            days_people_num_for_quickcheck[choice_day] += family_people_num[family_id]
+            if days_people_num_for_quickcheck[choice_day] > 300:
+                days_people_num_for_quickcheck[choice_day] -= family_people_num[family_id]
+                continue
             if idx < 4999:
                 generate_BF_assignment_inner(idx + 1)
             else:
                 days_people_num, check = compute_days_people_num(assignment)
                 if check is False:
+                    print('false_total_cnt is ', false_total_cnt, 'true_total_cnt is ', true_total_cnt)
                     false_total_cnt += 1
                     if false_total_cnt%1000==0:
                         print('false_total_cnt is ', false_total_cnt, 'true_total_cnt is ', true_total_cnt)
                 else:
                     true_total_cnt += 1
                     score = compute_score(assignment, days_people_num)
-                    print('get one score is', score)
+                    print('get one correct score is', score)
                     if score < score_min:
-                        score_min = score
-                        assignment_min = assignment
+                        assignment_min, score_min = assignment, score
         del assignment[family_id]
 
     generate_BF_assignment_inner(0)
     print('in generate_BF_assignment, score_min: {:.2f} '.format(score_min))
     return assignment_min, score_min
 
-sys.exit(0)
+#sys.exit(0)
 
 #assignment, score = generate_random_assignment()
 assignment, score = generate_BF_assignment()
 outcome_df = pd.DataFrame({'family_id': list(assignment.keys()), 
-                           'assigned_day': list(assignment.values())
-             })
+                           'assigned_day': list(assignment.values())})
 outcome_df = outcome_df[['family_id', 'assigned_day']]
 outcome_df.to_csv('./submission/submission_tsg_{:.2f}.csv'.format(score), index=False)
 
 print('prog ends here!')
 
-
 #data.to_csv('./atad/family_data_sorted.csv', index=False)
 #print('total number of people is ', data['n_people'].sum())
 
-
-#family_n_people = {}
-#for family_id, n_people in zip(data['family_id'], data['n_people']):
-#    family_n_people[family_id] = n_people
-#file_w_content = 'family_id,assigned_day\n'
-
-#file_w = open('./atad/submission_first_options_tsg.csv', 'w')
-#file_w.write(file_w_content)
-#file_w.close()
