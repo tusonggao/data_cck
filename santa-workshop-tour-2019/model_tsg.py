@@ -2,7 +2,6 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-
 sys.setrecursionlimit(10000) 
 
 gift_card = {0:0, 1:50, 2:50, 3:100, 4:200, 5:200, 6:300, 7:300, 8:400, 9:500, -1:500}
@@ -10,7 +9,8 @@ extra_cost_for_each_member = {0:0, 1:0, 2:9, 3:9, 4:9, 5:18, 6:18, 7:36, 8:36, 9
 
 data = pd.read_csv('./atad/family_data.csv')
 data = data.sort_values(by='n_people', ascending=False)
-family_ids_sorted = list(data['family_id'].values)
+#family_ids_sorted = list(data['family_id'].values)
+family_ids_sorted = list(range(5000))
 
 choices, choices_reversed, family_people_num = {}, {}, {}
 with open('./atad/family_data.csv') as file_r:
@@ -51,8 +51,10 @@ def generate_random_assignment():
     try_num = 0
     while True:
         try_num += 1
-        days = np.random.randint(low=1, high=101, size=5000)
-        assignment = {i:days[i] for i in range(0, 5000)}
+        #days = np.random.randint(low=1, high=101, size=5000)
+        #assignment = {i:days[i] for i in range(0, 5000)}
+        options = np.random.randint(low=0, high=10, size=5000)
+        assignment = {i:choices[i][options[i]] for i in range(0, 5000)}
         days_people_num, check = compute_days_people_num(assignment)
         print('check is ', check)
         if check is True:
@@ -74,6 +76,7 @@ def generate_BF_assignment():
         family_id = family_ids_sorted[idx]
         for i in range(10):
             choice_day = choices[family_id][i]
+            #print('choice day is ', choice_day)
             assignment[family_id] = choice_day
             days_people_num_for_quickcheck[choice_day] += family_people_num[family_id]
             if days_people_num_for_quickcheck[choice_day] > 300:
@@ -98,12 +101,13 @@ def generate_BF_assignment():
 
     generate_BF_assignment_inner(0)
     print('in generate_BF_assignment, score_min: {:.2f} '.format(score_min))
+
     return assignment_min, score_min
 
 #sys.exit(0)
 
-#assignment, score = generate_random_assignment()
-assignment, score = generate_BF_assignment()
+assignment, score = generate_random_assignment()
+#assignment, score = generate_BF_assignment()
 outcome_df = pd.DataFrame({'family_id': list(assignment.keys()), 
                            'assigned_day': list(assignment.values())})
 outcome_df = outcome_df[['family_id', 'assigned_day']]

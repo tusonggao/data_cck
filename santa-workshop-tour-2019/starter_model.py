@@ -1,7 +1,10 @@
 import os
+import time
 import sys
 import numpy as np
 import pandas as pd
+
+start_t_global = time.time()
 
 fpath = './atad/family_data.csv'
 data = pd.read_csv(fpath, index_col='family_id')
@@ -117,3 +120,4 @@ submission['assigned_day'] = new
 score = cost_function(new)
 submission.to_csv(f'submission_{score}.csv')
 print(f'Score: {score}')
+print('total cost time: ', time.time() - start_t_global)
