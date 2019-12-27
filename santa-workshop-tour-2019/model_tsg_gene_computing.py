@@ -1,6 +1,7 @@
 import os
 import time
 import sys
+import random
 import numpy as np
 import pandas as pd
 sys.setrecursionlimit(10000) 
@@ -68,91 +69,68 @@ def generate_random_assignment():
     print('in generate_random_assignment, try_num: {} score: {:.2f} '.format(try_num, score))
     return assignment, score
 
-def generate_BF_assignment():
-    assignment_min, score_min = {}, float('inf')
-    true_total_cnt, false_total_cnt = 0, 0
-    days_people_num_for_quickcheck = {i:0 for i in range(1, 101, 1)}
-    assignment = {}
-
-    def generate_BF_assignment_inner(idx):
-        nonlocal true_total_cnt, false_total_cnt, days_people_num_for_quickcheck, assignment
-        #if true_total_cnt >= 10:
-        #    return
-        family_id = family_ids_sorted[idx]
-        for i in range(10):
-            choice_day = choices[family_id][i]
-            #print('choice day is ', choice_day)
-            assignment[family_id] = choice_day
-            days_people_num_for_quickcheck[choice_day] += family_people_num[family_id]
-            if days_people_num_for_quickcheck[choice_day] > 300:
-                days_people_num_for_quickcheck[choice_day] -= family_people_num[family_id]
-                continue
-            if idx < 4999:
-                generate_BF_assignment_inner(idx + 1)
-            else:
-                days_people_num, check = compute_days_people_num(assignment)
-                if check is False:
-                    print('false_total_cnt is ', false_total_cnt, 'true_total_cnt is ', true_total_cnt)
-                    false_total_cnt += 1
-                    if false_total_cnt%1000==0:
-                        print('false_total_cnt is ', false_total_cnt, 'true_total_cnt is ', true_total_cnt)
-                else:
-                    true_total_cnt += 1
-                    score = compute_score(assignment, days_people_num)
-                    print('get one correct score is', score)
-                    if score < score_min:
-                        assignment_min, score_min = assignment, score
-        del assignment[family_id]
-
-    generate_BF_assignment_inner(0)
-    print('in generate_BF_assignment, score_min: {:.2f} '.format(score_min))
-
-    return assignment_min, score_min
+def store_assignment(assignment, score, current_min=False):
+    print('in store_assignment(), score is ', score)
+    outcome_df = pd.DataFrame({'family_id': list(assignment.keys()), 
+                           'assigned_day': list(assignment.values())})
+    outcome_df = outcome_df[['family_id', 'assigned_day']]
+    outcome_df = outcome_df.sort_values(by='family_id')
+    if current_min:
+        outcome_df.to_csv('./submission/min/submission_tsg_{:.5f}.csv'.format(score), index=False)
+    elif score < 700000:
+        outcome_df.to_csv('./submission/genes/submission_tsg_{:.5f}.csv'.format(score), index=False)
 
 def generate_fine_tuned_assignment():
     score_min = float('inf')
-    sample_submission = pd.read_csv('./atad/sample_submission.csv')
-    assignment = {family_id:day for family_id, day in 
-                  zip(sample_submission['family_id'].tolist(),
-                      sample_submission['assigned_day'].tolist())}
+    assigned_days_lst = list(range(1, 101, 1))*50
 
-    days_people_num, check = compute_days_people_num(assignment)
-    if check is True:
-        score = compute_score(assignment, days_people_num)
-        print('origin score is ', score)
+    while True:
+        random.shuffle(assigned_days_lst)
+        assignment = {i:assigned_days_lst[i] for i in range(5000)}
+        days_people_num, check = compute_days_people_num(assignment)
+        if check is True:
+            score = compute_score(assignment, days_people_num)
+            score_min = score
+            print('origin score_min is ', score_min)
+            break
 
-    for i in range(5000):
+    family_ids = list(range(5000))
+    random.shuffle(family_ids)
+    for i in family_ids:
         for j in range(10):
             new_assignment = assignment.copy()
             new_assignment[i] = choices[i][j]
             days_people_num, check = compute_days_people_num(new_assignment)
             if check is True:
                 score = compute_score(new_assignment, days_people_num)
-                #print('get new score ', score)
+                if score < 700000:   #672254.027668334
+                    pass
+                    #store_assignment(new_assignment, score)
                 if score < score_min:
                     score_min = score
-                    #print('new lowest score is ', score_min)
                     assignment = new_assignment.copy()
             else:
-                #print('check is ', check)
                 pass
     print('final score_min is ', score_min)
+    store_assignment(assignment, score_min, current_min=True)
     return assignment, score_min
 
 #sys.exit(0)
 
 #assignment, score = generate_random_assignment()
 #assignment, score = generate_BF_assignment()
-while True
-    assignment, score = generate_fine_tuned_assignment()
-    outcome_df = pd.DataFrame({'family_id': list(assignment.keys()), 
-                           'assigned_day': list(assignment.values())})
-    outcome_df = outcome_df[['family_id', 'assigned_day']]
-    outcome_df = outcome_df.sort_values(by='family_id')
-    outcome_df.to_csv('./submission/submission_tsg_{:.2f}.csv'.format(score), index=False)
+for try_num in range(1000):
+    print('try_num is ', try_num)
+    generate_fine_tuned_assignment()
 
 print('prog ends here! total cost time: ', time.time() - start_t_global)
+
+#########################################################################################################
 
 #data.to_csv('./atad/family_data_sorted.csv', index=False)
 #print('total number of people is ', data['n_people'].sum())
 
+    #sample_submission = pd.read_csv('./atad/sample_submission.csv')
+    #assignment = {family_id:day for family_id, day in 
+    #              zip(sample_submission['family_id'].tolist(),
+    #                  sample_submission['assigned_day'].tolist())}
