@@ -7,18 +7,6 @@ tsg_personal/
 # notepad++ bakup directory
 nppBackup/
 
-
-# OGeek directory
-OGeek/data/*
-!OGeek/data/README.md
-
-
-# predict-future-sales directory
-predict-future-sales/data/*
-!predict-future-sales/data/README.md
-
-
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
