@@ -57,16 +57,14 @@ def generate_random_assignment():
     try_num = 0
     while True:
         try_num += 1
-        #days = np.random.randint(low=1, high=101, size=5000)
-        #assignment = {i:days[i] for i in range(0, 5000)}
-        options = np.random.randint(low=0, high=10, size=5000)
-        assignment = {i:choices[i][options[i]] for i in range(0, 5000)}
+        days = np.random.randint(low=1, high=101, size=5000)
+        assignment = {i:days[i] for i in range(0, 5000)}
         days_people_num, check = compute_days_people_num(assignment)
-        print('check is ', check)
+        #print('check is ', check)
         if check is True:
             break
     score = compute_score(assignment, days_people_num)
-    print('in generate_random_assignment, try_num: {} score: {:.2f} '.format(try_num, score))
+    print('in generate_random_assignment, try_num: {} score: {:.5f} '.format(try_num, score))
     return assignment, score
 
 def store_assignment(assignment, score, current_min=False):
@@ -79,15 +77,10 @@ def store_assignment(assignment, score, current_min=False):
         outcome_df.to_csv('./submission/min_iterative/submission_tsg_{:.5f}.csv'.format(score), index=False)
 
 def generate_fine_tuned_assignment():
-    score_min = float('inf')
+    #score_min = float('inf')
     #assigned_days_lst = list(range(100, 0, -1))*50
     #assignment = {i:assigned_days_lst[i] for i in range(5000)}
-    assigned_days_lst = np.random.randint(low=1, high=101, size=5000)
-    assignment = {i:assigned_days_lst[i] for i in range(5000)}
-    #sample_submission = pd.read_csv('./submission/min_iterative/submission_tsg_504287.95222.csv')
-    #assignment = {family_id:day for family_id, day in 
-    #              zip(sample_submission['family_id'].tolist(),
-    #                  sample_submission['assigned_day'].tolist())}
+    assignment, score_min = generate_random_assignment()
 
     family_ids = list(range(5000))
     random.shuffle(family_ids)
