@@ -8,6 +8,11 @@ sys.setrecursionlimit(10000)
 gift_card = {0:0, 1:50, 2:50, 3:100, 4:200, 5:200, 6:300, 7:300, 8:400, 9:500, -1:500}
 extra_cost_for_each_member = {0:0, 1:0, 2:9, 3:9, 4:9, 5:18, 6:18, 7:36, 8:36, 9:36+199, -1:36+398}
 
+data = pd.read_csv('./atad/family_data.csv')
+data = data.sort_values(by='n_people', ascending=False)
+family_ids_sorted = list(data['family_id'].values)
+#print('family_ids_sorted is ', family_ids_sorted)
+
 choices, choices_reversed, family_people_num = {}, {}, {}
 with open('./atad/family_data.csv') as file_r:
     line_cnt = 0
@@ -60,15 +65,18 @@ def generate_random_assignment():
 def generate_BF_assignment():
     assignment_min, score_min = {}, float('inf')
     true_total_cnt, false_total_cnt = 0, 0
+    days_people_num_for_check = {i:0 for i in range(1, 101, 1)}
     assignment = {}
-    def generate_BF_assignment_inner(family_id):
+    def generate_BF_assignment_inner(idx):
         nonlocal true_total_cnt, false_total_cnt
         if true_total_cnt >= 10:
             return
+        family_id = family_ids_sorted[idx]
         for i in range(10):
             assignment[family_id] = choices[family_id][i]
-            if family_id < 4999:
-                generate_BF_assignment_inner(family_id+1)
+            days_people_num_for_check[family_id] += family_people_num[family_id]
+            if idx < 4999:
+                generate_BF_assignment_inner(idx + 1)
             else:
                 days_people_num, check = compute_days_people_num(assignment)
                 if check is False:
@@ -82,11 +90,13 @@ def generate_BF_assignment():
                     if score < score_min:
                         score_min = score
                         assignment_min = assignment
+        del assignment[family_id]
 
     generate_BF_assignment_inner(0)
-
     print('in generate_BF_assignment, score_min: {:.2f} '.format(score_min))
     return assignment_min, score_min
+
+sys.exit(0)
 
 #assignment, score = generate_random_assignment()
 assignment, score = generate_BF_assignment()
@@ -99,9 +109,6 @@ outcome_df.to_csv('./submission/submission_tsg_{:.2f}.csv'.format(score), index=
 print('prog ends here!')
 
 
-#data = pd.read_csv('./atad/family_data.csv', index_col='family_id')
-#data = pd.read_csv('./atad/family_data.csv')
-#data = data.sort_values(by='n_people', ascending=False)
 #data.to_csv('./atad/family_data_sorted.csv', index=False)
 #print('total number of people is ', data['n_people'].sum())
 
