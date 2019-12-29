@@ -115,7 +115,13 @@ def generate_fine_tuned_assignment():
     store_assignment(assignment, score_min, current_min=True)
     return assignment, score_min
 
-#sys.exit(0)
+df = pd.read_csv('./submission/submission_best.csv')
+assignment = {family_id : day for family_id, day in 
+              zip(df['family_id'].tolist(), df['assigned_day'].tolist())}
+days_people_num, check = compute_days_people_num(assignment)
+score = compute_score(assignment, days_people_num)
+print('best score is ', score)
+sys.exit(0)
 
 #assignment, score = generate_random_assignment()
 #assignment, score = generate_BF_assignment()
