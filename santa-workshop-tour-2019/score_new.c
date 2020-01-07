@@ -11,13 +11,13 @@ int cf[NF][10];
 
 int loaded=0;
 
-double acc[301][301];
+float acc[301][301];
 
 void precompute_acc() {
     
 for(int i=125;i<=300;i++) 
     for(int j=125;j<=300;j++)
-      acc[i][j] = (i-125.0)/400.0 * pow(i , 0.5 + fabs(i-j) / 50.0);    
+      acc[i][j] = (i-125.0)/400.0 * pow(i , 0.5 + fabs(i-j) / 50.0 );    
 }
 
 void read_fam() {
@@ -89,7 +89,8 @@ double score(int *pred) {
     r += acc[day_occ[d]][day_occ[d+1]];
   }
 
-  printf("outcome is %.5f\n", r);
+  printf("outcome is %.5f\n", r)
+
   return r;
 }  
 
