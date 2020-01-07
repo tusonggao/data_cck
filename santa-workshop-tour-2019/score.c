@@ -66,7 +66,7 @@ static inline int day_occ_ok(int d) {
 }
 
 float score(int *pred) {
-  float r=0;
+  float r=0.0;
     
   if (!loaded) {
       read_fam();
@@ -75,11 +75,11 @@ float score(int *pred) {
   }
 
   // validate day occupancy
-  memset(day_occ,0,101*sizeof(int));
+  memset(day_occ, 0, 101*sizeof(int));
 
-  for(int i=0;i<NF;i++) {
-    day_occ[pred[i]]+=fs[i];
-    r+=cost[i][pred[i]];
+  for(int i=0; i<NF; i++) {
+    day_occ[pred[i]] += fs[i];
+    r += cost[i][pred[i]];
   }
        
   day_occ[101]=day_occ[100];
@@ -90,3 +90,4 @@ float score(int *pred) {
   }
   return r;
 }  
+
