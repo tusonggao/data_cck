@@ -108,13 +108,15 @@ def generate_fine_tuned_assignment():
     return assignment, score_min
 
 sub = pd.read_csv('./submission/submission_672254.0276683343.csv')
-assignment = {family_id:assigned_day for family_id, assigned_day in zip(sub.family_id, sub.assigned_day)}
+assignment = {family_id:assigned_day for family_id, assigned_day in 
+              zip(sub.family_id.values, sub.assigned_day.values)}
 
 #pred = np.int32(sub.assigned_day.values)
-for i in range(50):
+start_t = time.time()
+for i in range(1000):
     days_people_num, check = compute_days_people_num(assignment)
-    score_val = compute_score(new_assignment, days_people_num)
-print('score_val is ', score_val)
+    score_val = compute_score(assignment, days_people_num)
+print('score_val of submission_672254.0276683343.csv is ', score_val, 'cost time: ', time.time()-start_t)
 
 sys.exit(0)
 
