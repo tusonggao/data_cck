@@ -97,7 +97,7 @@ double score(int *pred) {
     r += acc[day_occ[d]][day_occ[d+1]];
   }
 
-  printf("outcome is %.5f\n", r);
+  //printf("outcome is %.5f\n", r);
   return r;
 }  
 
