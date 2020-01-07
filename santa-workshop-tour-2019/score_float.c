@@ -1,3 +1,4 @@
+/* https://www.kaggle.com/sekrier/fast-scoring-using-c-42-usec */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +12,7 @@ int cf[NF][10];
 
 int loaded=0;
 
-double acc[301][301];
+float acc[301][301];
 
 void precompute_acc() {
     
@@ -65,8 +66,8 @@ static inline int day_occ_ok(int d) {
   return !(d <125 || d>300);
 }
 
-double score(int *pred) {
-  double r=0.0;
+float score(int *pred) {
+  float r=0.0;
     
   if (!loaded) {
       read_fam();
