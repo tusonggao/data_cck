@@ -65,6 +65,14 @@ static inline int day_occ_ok(int d) {
   return !(d <125 || d>300);
 }
 
+long long add_up_to(long num) {
+    long long sum_val = 0;
+    for(long i=0; i<num; i++){
+        sum_val += i;
+    }
+    return sum_val;
+}
+
 double score(int *pred) {
   double r=0.0;
     
