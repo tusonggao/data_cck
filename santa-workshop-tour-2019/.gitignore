@@ -5,6 +5,7 @@ running_output*
 atad/
 data/
 submission/
+miss/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
