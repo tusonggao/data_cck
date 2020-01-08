@@ -11,8 +11,11 @@ def main():
 
     # 和LP问题一样，定义变量 x,y 并指定其定义域
     # 这里需要注意，我们定义的是Int类型的变量
-    x = solver.IntVar(0.0, solver.infinity(), 'x')
-    y = solver.IntVar(0.0, solver.infinity(), 'y')
+    #x = solver.IntVar(0.0, solver.infinity(), 'x')
+    #y = solver.IntVar(0.0, solver.infinity(), 'y')
+
+    x = solver.NumVar(0.0, solver.infinity(), 'x')
+    y = solver.NumVar(0.0, solver.infinity(), 'y')
 
     # 添加约束，方法和LP一样，通过制定系数来添加约束
     # 如果能像cp-sat那么方便就好了
