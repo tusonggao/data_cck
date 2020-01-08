@@ -117,7 +117,8 @@ best, best_score = lucky_choice_search(
     original=original, 
     n_iter=2500000000, # run more iterations and find the optimal if you are lucky enough ;)
     disable_tqdm=False,
-    random_state=20191217,
+    #random_state=20191217,
+    random_state=None,
     verbose=None
 )
 
