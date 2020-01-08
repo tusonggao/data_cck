@@ -1,5 +1,7 @@
+import random
 import time
 import sys
+import itertools
 import pandas as pd
 import numpy as np
 from tqdm import tqdm_notebook as tqdm
@@ -29,6 +31,49 @@ start_t = time.time()
 for i in range(1):
     score_val = score(pred)
 print('1000 times computation cost time: ', time.time() - start_t)
+
+best_score = score(pred)
+print('original best_score is ', best_score)
+
+iter_num = 0
+computed_pairs = set()
+
+for i in range(1000):
+    print('i is ', i)
+    while True:
+        idx1, idx2 = random.sample(range(5000), 2)
+        if idx1==idx2:
+            continue
+        if idx1 > idx2:
+            idx1, idx2 = idx2, idx1
+        if (idx1, idx2) not in computed_pairs:
+            computed_pairs.add((idx1, idx2))
+            break
+        print('idx1 idx2: ', idx1, idx2)
+
+    for j1, j2 in itertools.product(range(1, 101), range(1, 101)):
+        iter_num += 1
+        if iter_num%5000==0:
+            print('iter_num is ', iter_num, 'idx1 idx2: ', idx1, idx2)
+        prev_day_1, prev_day2 = pred[idx1], pred[idx2]
+        pred[idx1], pred[idx2] = j1, j2
+
+        new_score = score(pred)
+        if new_score < best_score:
+            print('new best score is ', new_score)
+            best_score = new_score
+            df = pd.DataFrame({'family_id': np.arange(5000), 'assigned_day': pred})
+            df.to_csv('./submission/random_best/submission_{}.csv'.format(best_score), index=False)
+        else:
+            pred[idx1], pred[idx2] = prev_day_1, prev_day2
+
+
+print('prog ends here!')
+
+sys.exit(0)
+
+            
+pred_new = pred.copy()
 
 fam = pd.read_csv("./atad/family_data.csv")
 pref = fam.values[:,1:-1]
