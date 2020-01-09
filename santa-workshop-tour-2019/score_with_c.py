@@ -23,14 +23,19 @@ add_up_to.restype = ctypes.c_longlong
 add_up_to.argtypes = [ctypes.c_long]
 
 #sub = pd.read_csv('./submission/submission_672254.0276683343.csv')
-sub = pd.read_csv('./submission/submission_69818.70.csv')
+#sub = pd.read_csv('./submission/submission_69818.70.csv')
+sub = pd.read_csv('./atad/sample_submission.csv')
 pred = np.int32(sub.assigned_day.values)
 print('get 222')
 
+N_NUM = 1000000
 start_t = time.time()
-for i in range(1):
+for i in range(N_NUM):
     score_val = score(pred)
-print('1000 times computation cost time: ', time.time() - start_t)
+sec_per_run = (time.time() - start_t)/N_NUM
+print('sec_per_run is:', sec_per_run)
+
+sys.exit(0)
 
 best_score = score(pred)
 print('original best_score is ', best_score)

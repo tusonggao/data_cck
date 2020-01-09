@@ -1,6 +1,4 @@
-# https://www.kaggle.com/xhlulu/santa-s-2019-faster-cost-function-24-s
 import os
-import time
 from functools import partial
 
 from numba import njit
@@ -20,6 +18,7 @@ def _build_choice_array(data, n_days):
     
     return choice_array_num
 
+
 def _precompute_accounting(max_day_count, max_diff):
     accounting_matrix = np.zeros((max_day_count+1, max_diff+1))
     # Start day count at 1 in order to avoid division by 0
@@ -29,6 +28,7 @@ def _precompute_accounting(max_day_count, max_diff):
             accounting_matrix[today_count, diff] = max(0, accounting_cost)
     
     return accounting_matrix
+
 
 def _precompute_penalties(choice_array_num, family_size):
     penalties_array = np.array([
@@ -110,14 +110,11 @@ def _compute_cost_fast(prediction, family_size, days_array,
     return penalty, accounting_cost, daily_occupancy
 
 
-#def build_cost_function(family_data_path, N_DAYS=100, MAX_OCCUPANCY=300, MIN_OCCUPANCY=125):
 def build_cost_function(data, N_DAYS=100, MAX_OCCUPANCY=300, MIN_OCCUPANCY=125):
     """
     data (pd.DataFrame): 
         should be the df that contains family information. Preferably load it from "family_data.csv".
     """
-
-    #data = pd.read_csv(family_data_path, index_col='family_id')
     family_size = data.n_people.values
     days_array = np.arange(N_DAYS, 0, -1)
 
@@ -155,32 +152,19 @@ if __name__ == '__main__':
     base_path = './atad/'
     data = pd.read_csv(base_path + 'family_data.csv', index_col='family_id')
     #submission = pd.read_csv(base_path + 'sample_submission.csv', index_col='family_id')
-    #submission = pd.read_csv('./mission/random_best/submission_69756.98.csv', index_col='family_id')
     submission = pd.read_csv('./mission/submission_672254.0276683343.csv', index_col='family_id')
-    print('submission_672254.0276683343.csv')
-    #submission_69760.27.csv
-    #submission_69760.28.csv
 
     # Build our cost_function
-    #cost_function = build_cost_function('./atad/family_data.csv')
     cost_function = build_cost_function(data)
 
     # Start with the sample submission values
     best = submission['assigned_day'].values
 
+
     # Let's see how fast it is:
-    '''
     function_call_times = timeit.repeat(lambda: cost_function(best), repeat=10, number=20000)
     mean_call_time = np.array(function_call_times[3:]).mean() / 20000
     print(f"cost_function takes {mean_call_time:.3e} seconds to run")
-    '''
-
-    N_NUM = 1000000
-    start_t = time.time()
-    for i in range(N_NUM):
-        best_v = cost_function(best)
-    secs_per_run = (time.time() - start_t)/N_NUM
-    print('best_v is ', best_v, 'secs_per_run is ', secs_per_run)
 
     # We can now proceed with the optimization
     choice_matrix = data.loc[:, 'choice_0': 'choice_9'].values
@@ -202,8 +186,3 @@ if __name__ == '__main__':
     print(f'Score: {score}')
     submission['assigned_day'] = new
     submission.to_csv(f'submission_{score}.csv')
-    
-    print('prog ends here!')
-
-
-

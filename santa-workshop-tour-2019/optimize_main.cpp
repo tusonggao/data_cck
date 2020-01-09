@@ -1,3 +1,5 @@
+// https://www.kaggle.com/golubev/c-stochastic-product-search-65ns
+#include <cstring>
 #include <array>
 #include <cassert>
 #include <algorithm>
@@ -137,8 +139,12 @@ double calc(const array<uint8_t, 5000>& assigned_days, bool print=false) {
     return preference_cost + accounting_penalty;
 }
 
-void save_sub(const array<uint8_t, 5000>& assigned_day) {
-    ofstream out("submission.csv");
+void save_sub(const array<uint8_t, 5000>& assigned_day, double score) {
+    cout << "saved a new best file: " << score << endl;
+    char filename[500];
+    sprintf(filename, "./mission/random_best/submission_%.2f.csv", score);
+    // ofstream out("./mission/random_best/submission.csv");
+    ofstream out(filename);
     out << "family_id,assigned_day" << endl;
     for (int i = 0; i < assigned_day.size(); ++i)
         out << i << "," << choices[i][assigned_day[i]]+1 << endl;
@@ -170,6 +176,7 @@ void stochastic_product_search(Index index, ExitFunction fn) { // 15'360'000it/s
     iota(begin(indices), end(indices), 0);
     array<uint16_t, DISTRIBUTION.size()> best_indices{};
     array<uint8_t, DISTRIBUTION.size()> best_change{};
+    bool found_better_global = false;
     for (; fn();) {
         bool found_better = false;
         for (int k = 0; k < BEST_N; ++k) {
@@ -179,32 +186,50 @@ void stochastic_product_search(Index index, ExitFunction fn) { // 15'360'000it/s
                 auto score = index.calc(indices, change);
                 if (score < best_local_score) {
                     found_better = true;
+                    found_better_global = true;
                     best_local_score = score;
                     best_change = change;
+                    save_sub(index.assigned_days, score);
                     copy_n(begin(indices), DISTRIBUTION.size(), begin(best_indices));
                 }
             }
         }
         if (found_better) { // reindex from N best if found better
             index.reindex(best_indices, best_change);
-//            save_sub(index.assigned_days);
+            //save_sub(index.assigned_days);
             calc(index.assigned_days, true);
             
         }
     }
-    save_sub(index.assigned_days);
+    if (found_better_global) {
+        // save_sub(index.assigned_days);
+    }
 }
 
 int main() {
+    cout << "hello world" << 3.3333 << endl;
+    //return 0;
+
+    // cout << "saved a new best file" << endl;
+    // char filename[50];
+    //float score = 2222.2;
+    //sprintf(filename, "./mission/random_best/submission_%.2f.csv", score);
+    // ofstream out("./mission/random_best/submission.csv");
+    //ofstream out(filename);
+    //out << "family_id,assigned_day" << endl;
+
     init_data();
-    auto assigned_day = read_submission("./mission/submission_best_69880.40.csv");
+    //auto assigned_day = read_submission("./mission/submission_best_69880.40.csv");
+    //auto assigned_day = read_submission("./atad/sample_submission.csv");
+    auto assigned_day = read_submission("./mission/submission_69761.84.csv");
 
     Index index(assigned_day);
     calc(index.assigned_days, true);
 //    auto forever = []() { return true; };
 //    auto count_exit = [start = 0]() mutable { return (++start <= 1000); };
     auto time_exit = [start = high_resolution_clock::now()]() {
-        return duration_cast<minutes>(high_resolution_clock::now()-start).count() < 535; //8h55
+        // return duration_cast<minutes>(high_resolution_clock::now()-start).count() < 535; //8h55
+        return duration_cast<minutes>(high_resolution_clock::now()-start).count() < 12000; //8h55
     };
     
     stochastic_product_search(index, time_exit);

@@ -1,3 +1,4 @@
+import time
 import sys
 import os
 import ctypes
@@ -5,13 +6,19 @@ from numpy.ctypeslib import ndpointer
 import pandas as pd
 import numpy as np
 from tqdm.notebook import tqdm
+from fastest_cost_function import build_cost_function
 from numba import njit, prange
 
+# Build our cost_function
+cost_function = build_cost_function('./atad/family_data.csv')
+
+'''
 lib = ctypes.CDLL('./score_double.so')
 cost_function = lib.score
 #cost_function.restype = ctypes.c_float
 cost_function.restype = ctypes.c_double
 cost_function.argtypes = [ndpointer(ctypes.c_int)]
+'''
 
 '''
 score = []
@@ -39,8 +46,29 @@ print('get here 111')
 
 # Run it on default submission file
 original = submission['assigned_day'].values
-original_score = cost_function(np.int32(original))
-print('original_score is ', original_score)
+original = original.astype(np.int32)
+
+start_t = time.time()
+original_score = cost_function(original)
+cost_time = time.time() - start_t
+print('original_score is ', original_score, cost_time)
+
+start_t = time.time()
+original_score = cost_function(original)
+cost_time = time.time() - start_t
+print('original_score is ', original_score, cost_time)
+
+start_t = time.time()
+original_score = cost_function(original)
+cost_time = time.time() - start_t
+print('original_score is ', original_score, cost_time)
+
+start_t = time.time()
+original_score = cost_function(original)
+cost_time = time.time() - start_t
+print('original_score is ', original_score, cost_time)
+
+sys.exit(0)
 
 choice_matrix = data.loc[:, 'choice_0': 'choice_9'].values
 print('choice_matrix.shape is', choice_matrix.shape)
@@ -70,7 +98,6 @@ for j in range(choice_weight.shape[0]):
     choice_weight[j] /= sum(choice_weight[j])
     
 print('choice_weight is ', choice_weight, 'choice_weight.shape is ', choice_weight.shape)
-
 print('get here 222')
 
 #sys.exit(0)
