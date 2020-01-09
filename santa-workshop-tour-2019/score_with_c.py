@@ -1,5 +1,6 @@
 import random
 import time
+import os
 import sys
 import itertools
 import pandas as pd
@@ -7,6 +8,21 @@ import numpy as np
 from tqdm import tqdm_notebook as tqdm
 import ctypes
 from numpy.ctypeslib import ndpointer
+
+def get_all_files(dir_name):   # 递归得到文件夹下的所有文件
+    all_files_lst = []
+    def get_all_files_worker(path):
+        allfilelist = os.listdir(path)
+        for file in allfilelist:
+            filepath = os.path.join(path, file)
+            #判断是不是文件夹
+            if os.path.isdir(filepath):
+                get_all_files_worker(filepath)
+            else:
+                all_files_lst.append(filepath)
+    get_all_files_worker(dir_name)
+    return all_files_lst
+
 
 def add_up_to_python(num):
     sum_v = 0
@@ -24,18 +40,28 @@ add_up_to.argtypes = [ctypes.c_long]
 
 #sub = pd.read_csv('./submission/submission_672254.0276683343.csv')
 #sub = pd.read_csv('./submission/submission_69818.70.csv')
-sub = pd.read_csv('./atad/sample_submission.csv')
-pred = np.int32(sub.assigned_day.values)
+#sub = pd.read_csv('./atad/sample_submission.csv')
+#sub = pd.read_csv('./mission/random_best/submission_69752.88.csv')
+#pred = np.int32(sub.assigned_day.values)
+
+for file_name in get_all_files('./mission/random_best/'): 
+    sub = pd.read_csv(file_name)
+    pred = np.int32(sub.assigned_day.values)
+    score_val = score(pred)
+    print('file_name score is ', file_name, 'score_val is ', score_val)
+
 print('get 222')
 
-N_NUM = 1000000
+sys.exit(0)
+
+N_NUM = 1000
 start_t = time.time()
 for i in range(N_NUM):
     score_val = score(pred)
 sec_per_run = (time.time() - start_t)/N_NUM
+print('score_val is ', score_val)
 print('sec_per_run is:', sec_per_run)
 
-sys.exit(0)
 
 best_score = score(pred)
 print('original best_score is ', best_score)

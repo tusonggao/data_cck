@@ -142,7 +142,7 @@ double calc(const array<uint8_t, 5000>& assigned_days, bool print=false) {
 void save_sub(const array<uint8_t, 5000>& assigned_day, double score) {
     cout << "saved a new best file: " << score << endl;
     char filename[500];
-    sprintf(filename, "./mission/random_best/submission_%.2f.csv", score);
+    sprintf(filename, "./mission/random_best/submission_%.3f.csv", score);
     // ofstream out("./mission/random_best/submission.csv");
     ofstream out(filename);
     out << "family_id,assigned_day" << endl;
@@ -189,14 +189,15 @@ void stochastic_product_search(Index index, ExitFunction fn) { // 15'360'000it/s
                     found_better_global = true;
                     best_local_score = score;
                     best_change = change;
-                    save_sub(index.assigned_days, score);
+                    //save_sub(index.assigned_days, score);
                     copy_n(begin(indices), DISTRIBUTION.size(), begin(best_indices));
                 }
             }
         }
         if (found_better) { // reindex from N best if found better
             index.reindex(best_indices, best_change);
-            //save_sub(index.assigned_days);
+            double current_best_score = calc(index.assigned_days);
+            save_sub(index.assigned_days, current_best_score);
             calc(index.assigned_days, true);
             
         }
@@ -221,7 +222,9 @@ int main() {
     init_data();
     //auto assigned_day = read_submission("./mission/submission_best_69880.40.csv");
     //auto assigned_day = read_submission("./atad/sample_submission.csv");
-    auto assigned_day = read_submission("./mission/submission_69761.84.csv");
+    //auto assigned_day = read_submission("./mission/submission_69761.84.csv");
+    //auto assigned_day = read_submission("./mission/submission_69752.88.csv");
+    auto assigned_day = read_submission("./mission/submission_69740.834.csv");
 
     Index index(assigned_day);
     calc(index.assigned_days, true);
@@ -229,7 +232,7 @@ int main() {
 //    auto count_exit = [start = 0]() mutable { return (++start <= 1000); };
     auto time_exit = [start = high_resolution_clock::now()]() {
         // return duration_cast<minutes>(high_resolution_clock::now()-start).count() < 535; //8h55
-        return duration_cast<minutes>(high_resolution_clock::now()-start).count() < 12000; //8h55
+        return duration_cast<minutes>(high_resolution_clock::now()-start).count() < 120000; //8h55
     };
     
     stochastic_product_search(index, time_exit);
