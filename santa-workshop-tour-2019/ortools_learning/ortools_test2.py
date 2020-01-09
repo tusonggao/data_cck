@@ -29,8 +29,8 @@ def main():
 
     for i in range(data['num_constraints']):
         constraint = solver.RowConstraint(0, data['bounds'][i], '')
-    for j in range(data['num_vars']):
-        constraint.SetCoefficient(x[j], data['constraint_coeffs'][i][j])
+        for j in range(data['num_vars']):
+            constraint.SetCoefficient(x[j], data['constraint_coeffs'][i][j])
     print('Number of constraints =', solver.NumConstraints())
     # In Python, you can also set the constraints as follows.
     # for i in range(data['num_constraints']):

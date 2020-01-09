@@ -1,3 +1,4 @@
+import sys
 import os
 import ctypes
 from numpy.ctypeslib import ndpointer
@@ -28,8 +29,9 @@ top_k = 3
 
 # Load Data
 data = pd.read_csv('./atad/family_data.csv', index_col='family_id')
-submission = pd.read_csv(f'./submission/submission_69818.70.csv', index_col='family_id')
-#submission = pd.read_csv(f'./submission_newest.csv', index_col='family_id')
+#submission = pd.read_csv(f'./submission/submission_69818.70.csv', index_col='family_id')
+#submission = pd.read_csv(f'./submission/submission_69818.70.csv', index_col='family_id')
+submission = pd.read_csv(f'./mission/submission_672254.0276683343.csv', index_col='family_id')
 
 sub = [submission]
 
@@ -41,6 +43,7 @@ original_score = cost_function(np.int32(original))
 print('original_score is ', original_score)
 
 choice_matrix = data.loc[:, 'choice_0': 'choice_9'].values
+print('choice_matrix.shape is', choice_matrix.shape)
 
 fam_weight = []
 
@@ -50,8 +53,7 @@ for i, s in enumerate(submission.iterrows()):
             fam_weight.append(c+1)
 fam_weight = np.array(fam_weight)
 fam_weight = fam_weight / sum(fam_weight)
-print(fam_weight)
-
+print('fam_weight is ', fam_weight, 'fam_weight.shape is ', fam_weight.shape)
 
 # The redundancy is used to ensure evey choice can be selected with some probability since some choices are not selected in history submission
 redundancy = 5 # any number larger than 0
@@ -67,9 +69,11 @@ choice_weight += redundancy
 for j in range(choice_weight.shape[0]):
     choice_weight[j] /= sum(choice_weight[j])
     
-print(choice_weight)
+print('choice_weight is ', choice_weight, 'choice_weight.shape is ', choice_weight.shape)
 
 print('get here 222')
+
+#sys.exit(0)
 
 # A fast function for sampling indices from a 2-D probability array in a vectorised way
 def random_choice_prob_index(a, axis=1):
@@ -88,6 +92,7 @@ def lucky_choice_search(top_k, fam_size, original, choice_matrix,
     
     # Select fam_size families from 5000 families with probability distribution fam_weight
     fam_indices = np.random.choice(range(choice_matrix.shape[0]), size=fam_size, p=fam_weight)
+    print('fam_indices.shape is ', fam_indices.shape)
 
     for i in tqdm(range(n_iter), disable=disable_tqdm):
         if i%500000==0:
@@ -95,8 +100,13 @@ def lucky_choice_search(top_k, fam_size, original, choice_matrix,
         new = best.copy()
         
         # Select choices for each family based on the probability distribution of their choices from multiple history submissions
-        new[fam_indices] = choice_matrix[fam_indices, random_choice_prob_index(choice_weight[fam_indices])]
+        choice_outcome = random_choice_prob_index(choice_weight[fam_indices])
+        print('choice_outcome.shpae is ', choice_outcome.shape)
+
+        #new[fam_indices] = choice_matrix[fam_indices, random_choice_prob_index(choice_weight[fam_indices])]
+        new[fam_indices] = choice_matrix[fam_indices, choice_outcome]
         new_score = cost_function(np.int32(new))
+        print('new_score is ', new_score)
 
         if new_score < best_score:
             best_score = new_score
@@ -115,7 +125,8 @@ best, best_score = lucky_choice_search(
     top_k=top_k,
     fam_size=20, 
     original=original, 
-    n_iter=2500000000, # run more iterations and find the optimal if you are lucky enough ;)
+    #n_iter=2500000000, # run more iterations and find the optimal if you are lucky enough ;)
+    n_iter=1, # run more iterations and find the optimal if you are lucky enough ;)
     disable_tqdm=False,
     #random_state=20191217,
     random_state=None,

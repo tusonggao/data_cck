@@ -1,3 +1,5 @@
+import os
+import sys
 from ortools.linear_solver import pywraplp
 
 MAX_BEST_CHOICE = 6
@@ -6,6 +8,12 @@ NUM_SECONDS = 3600
 NUM_THREADS = 4
 
 print('get here 111')
+
+def get_daily_occupancy(assigned_days):
+    daily_occupancy = {}
+    for day in assigned_days:
+        daily_occupancy[day] = daily_occupancy.get(day, 0) + 1
+    print('get 111')
 
 for i in range(40):
     print('i is ', i)
@@ -49,3 +57,7 @@ for i in range(40):
         print('Result:', status[sol], cost_function(tmp))
     else:
         print('Result:', status[sol])
+
+print('prog ends here final!')
+
+
