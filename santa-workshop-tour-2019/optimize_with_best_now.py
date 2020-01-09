@@ -1,21 +1,65 @@
 import os
+import numpy as np
+import pandas as pd
 import sys
 from ortools.linear_solver import pywraplp
 
-MAX_BEST_CHOICE = 6
-NUM_SWAP = 2500
-NUM_SECONDS = 3600
-NUM_THREADS = 4
+#MAX_BEST_CHOICE = 2
+#NUM_SWAP = 2500
 
-print('get here 111')
+MAX_BEST_CHOICE = 8
+NUM_SWAP = 2500
+
+NUM_SECONDS = 3600
+NUM_THREADS = 6
+
+NUMBER_FAMILIES = 5000
+NUMBER_DAYS = 100
+
+COST_PER_FAMILY = [0, 50, 50, 100, 200, 200, 300, 300, 400, 500, 500]
+COST_PER_FAMILY_MEMBER = [0, 0, 9, 9, 9, 18, 18, 36, 36, 36+199, 36+398]
+
+DESIRED = {}
+N_PEOPLE = {}
+with open('./atad/family_data.csv') as file_r:
+    line_cnt = 0
+    for line in file_r:
+        line_cnt += 1
+        if line_cnt==1:
+            continue
+        family_id = int(line.strip().split(',')[0])
+        n_people = int(line.strip().split(',')[-1])
+        N_PEOPLE[family_id] = n_people
+        DESIRED[family_id] = [int(day) for day in line.strip().split(',')[1:-1]]
 
 def get_daily_occupancy(assigned_days):
+    print('in get_daily_occupancy')
     daily_occupancy = {}
     for day in assigned_days:
         daily_occupancy[day] = daily_occupancy.get(day, 0) + 1
-    print('get 111')
+    daily_occupancy = np.array([daily_occupancy[i+1] for i in range(NUMBER_DAYS)])
+    return daily_occupancy
 
-for i in range(40):
+# submission_69761.84.csv submission_69805.70.csv submission_69818.70.csv 
+
+#df1 = pd.read_csv('./mission/submission_69761.84.csv')
+df1 = pd.read_csv('./mission/submission_672254.0276683343.csv')
+assigned_days1 = df1['assigned_day'].values
+daily_occupancy1 = get_daily_occupancy(assigned_days1)
+
+df2 = pd.read_csv('./mission/submission_69805.70.csv')
+assigned_days2 = df2['assigned_day'].values
+daily_occupancy2 = get_daily_occupancy(assigned_days2)
+
+print('daily_occupancy1 is ', daily_occupancy1)
+print('daily_occupancy2 is ', daily_occupancy2)
+print('daily_occupancy1 equals with daily_occupancy2', daily_occupancy1==daily_occupancy2)
+
+assigned_days = assigned_days1
+
+#sys.exit(0)
+#for i in range(40):
+for i in range(2):
     print('i is ', i)
     solver = pywraplp.Solver('Optimization preference cost', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     daily_occupancy = get_daily_occupancy(assigned_days).astype(float)
