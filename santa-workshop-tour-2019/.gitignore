@@ -1,5 +1,6 @@
 # skip data submission directory 
 nohup.out
+optimize_main
 *.csv
 running_output*
 atad/

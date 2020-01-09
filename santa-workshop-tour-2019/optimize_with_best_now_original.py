@@ -1,14 +1,15 @@
 import os
+import sys
 import numpy as np
 import pandas as pd
-import sys
 from ortools.linear_solver import pywraplp
-
-#MAX_BEST_CHOICE = 2
-#NUM_SWAP = 2500
 
 MAX_BEST_CHOICE = 8
 NUM_SWAP = 2500
+
+#MAX_BEST_CHOICE = 8
+#NUM_SWAP = 250
+
 NUM_SECONDS = 3600
 NUM_THREADS = 6
 NUMBER_FAMILIES = 5000
@@ -38,27 +39,15 @@ def get_daily_occupancy(assigned_days):
     daily_occupancy = np.array([daily_occupancy[i+1] for i in range(NUMBER_DAYS)])
     return daily_occupancy
 
-# submission_69761.84.csv submission_69805.70.csv submission_69818.70.csv 
+#df = pd.read_csv('./mission/submission_672254.0276683343.csv')
+#df = pd.read_csv('./mission/submission_best_69880.40.csv')
+df = pd.read_csv('./atad/sample_submission.csv')
+assigned_days = df['assigned_day'].values
+daily_occupancy = get_daily_occupancy(assigned_days)
+print('get daily_occupancy is ', daily_occupancy)
 
-#df1 = pd.read_csv('./mission/submission_69761.84.csv')
-df1 = pd.read_csv('./mission/submission_672254.0276683343.csv')
-assigned_days1 = df1['assigned_day'].values
-daily_occupancy1 = get_daily_occupancy(assigned_days1)
-
-df2 = pd.read_csv('./mission/submission_69805.70.csv')
-assigned_days2 = df2['assigned_day'].values
-daily_occupancy2 = get_daily_occupancy(assigned_days2)
-
-print('daily_occupancy1 is ', daily_occupancy1)
-print('daily_occupancy2 is ', daily_occupancy2)
-print('daily_occupancy1 equals with daily_occupancy2', daily_occupancy1==daily_occupancy2)
-
-assigned_days = assigned_days1
-
-#sys.exit(0)
-#for i in range(40):
-for i in range(2):
-    print('i is ', i)
+for i in range(40):
+    print('i is', i)
     solver = pywraplp.Solver('Optimization preference cost', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     daily_occupancy = get_daily_occupancy(assigned_days).astype(float)
     fids = np.random.choice(range(NUMBER_FAMILIES), NUM_SWAP, replace=False)
@@ -74,8 +63,6 @@ for i in range(2):
     solver.set_time_limit(NUM_SECONDS*NUM_THREADS*1000)
     solver.SetNumThreads(NUM_THREADS)
 
-    print('get here 222')
-
     for day in range(NUMBER_DAYS):
         if daily_occupancy[day]:
             solver.Add(solver.Sum([N_PEOPLE[fid] * B[fid, day] for fid in range(NUMBER_FAMILIES) if (fid,day) in B]) == daily_occupancy[day])
@@ -90,7 +77,7 @@ for i in range(2):
     if status[sol] in ['OPTIMAL', 'FEASIBLE']:
         tmp = assigned_days.copy()
         for fid, day in B:
-            if B[fid, day].solution_value() > 0.45:
+            if B[fid, day].solution_value() > 0.48:
                 tmp[fid] = day+1
         if cost_function(tmp)[2] < cost_function(assigned_days)[2]:
             assigned_days = tmp
@@ -99,7 +86,3 @@ for i in range(2):
         print('Result:', status[sol], cost_function(tmp))
     else:
         print('Result:', status[sol])
-
-print('prog ends here final!')
-
-
