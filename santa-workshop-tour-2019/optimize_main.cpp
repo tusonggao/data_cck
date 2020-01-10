@@ -1,4 +1,5 @@
 // https://www.kaggle.com/golubev/c-stochastic-product-search-65ns
+// g++ -pthread -lpthread -O3 -std=c++17 -o optimize_main optimize_main.cpp
 #include <cstring>
 #include <array>
 #include <cassert>
@@ -226,7 +227,8 @@ int main() {
     //auto assigned_day = read_submission("./mission/submission_69761.84.csv");
     //auto assigned_day = read_submission("./mission/submission_69752.88.csv");
     //auto assigned_day = read_submission("./mission/submission_69740.834.csv");
-    auto assigned_day = read_submission("./mission/submission_69733.050.csv");
+    //auto assigned_day = read_submission("./mission/submission_69733.050.csv");
+    auto assigned_day = read_submission("./mission/submission_69723.152.csv");
 
     Index index(assigned_day);
     calc(index.assigned_days, true);
