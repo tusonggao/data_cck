@@ -228,7 +228,8 @@ int main() {
     //auto assigned_day = read_submission("./mission/submission_69752.88.csv");
     //auto assigned_day = read_submission("./mission/submission_69740.834.csv");
     //auto assigned_day = read_submission("./mission/submission_69733.050.csv");
-    auto assigned_day = read_submission("./mission/submission_69723.152.csv");
+    //auto assigned_day = read_submission("./mission/submission_69723.152.csv");
+    auto assigned_day = read_submission("./mission/submission_69721.468.csv");
 
     Index index(assigned_day);
     calc(index.assigned_days, true);
