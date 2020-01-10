@@ -53,7 +53,8 @@ void init_data() {
 }
 array<uint8_t, 5000> read_submission(string filename) {
     ifstream in(filename);
-    assert(in && "submission.csv");
+    //assert(in && "submission.csv");
+    assert(in);
     array<uint8_t, 5000> assigned_day{};
     string header;
     int id, x;
@@ -224,7 +225,8 @@ int main() {
     //auto assigned_day = read_submission("./atad/sample_submission.csv");
     //auto assigned_day = read_submission("./mission/submission_69761.84.csv");
     //auto assigned_day = read_submission("./mission/submission_69752.88.csv");
-    auto assigned_day = read_submission("./mission/submission_69740.834.csv");
+    //auto assigned_day = read_submission("./mission/submission_69740.834.csv");
+    auto assigned_day = read_submission("./mission/submission_69733.050.csv");
 
     Index index(assigned_day);
     calc(index.assigned_days, true);
