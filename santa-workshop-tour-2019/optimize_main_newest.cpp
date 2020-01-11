@@ -1,5 +1,5 @@
 // https://www.kaggle.com/golubev/c-stochastic-product-search-65ns
-// g++ -pthread -lpthread -O3 -std=c++17 -o optimize_main optimize_main.cpp
+// g++ -pthread -lpthread -O3 -std=c++17 -o optimize_main_newest optimize_main_newest.cpp
 #include <cstring>
 #include <array>
 #include <cassert>
@@ -18,7 +18,7 @@ using namespace std::chrono;
 
 // You can setup how many families you need for swaps and what best choice use for each family
 //constexpr array<uint8_t, 14> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5}; 
-constexpr array<uint8_t, 16> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 5}; 
+constexpr array<uint8_t, 15> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 5}; 
 // {2, 5} it's mean the first random family will brute force for choices 1-2 and the second random family will brute force for choices 1-5
 
 constexpr int MAX_OCCUPANCY = 300;
@@ -234,8 +234,8 @@ int main() {
     //auto assigned_day = read_submission("./mission/submission_69733.050.csv");
     //auto assigned_day = read_submission("./mission/submission_69723.152.csv");
     //auto assigned_day = read_submission("./mission/submission_69721.468.csv");
-    //auto assigned_day = read_submission("./mission/submission_69695.779.csv");
-    auto assigned_day = read_submission("./mission/submission_69674.730.csv");
+    //auto assigned_day = read_submission("./mission/submission_69707.687.csv");
+    auto assigned_day = read_submission("./mission/submission_69695.779.csv");
 
     Index index(assigned_day);
     calc(index.assigned_days, true);

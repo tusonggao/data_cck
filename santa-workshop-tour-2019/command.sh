@@ -8,4 +8,5 @@ do
 done
 
 # sudo kill -9 $(pidof 进程名关键字)
+# sudo kill -9 $(pidof optimize_main)
 
