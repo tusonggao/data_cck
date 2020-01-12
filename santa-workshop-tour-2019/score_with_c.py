@@ -189,8 +189,6 @@ print('sum_v of np is ', sum_v)
 
 print('python add up to', sum_v, 'cost time: ', 'c_cost_time: {} python_cost_time: {} np_cost_time: {}'.format(c_cost_time, python_cost_time, np_cost_time))
 
-#print('python add up to', add_up_to(100000), 'cost time: ', time.time() - start_t)
-
 
 lib = ctypes.CDLL('./score_float.so')
 score = lib.score
