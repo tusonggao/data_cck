@@ -100,12 +100,10 @@ def cost_function(prediction):
 
     return penalty
 
-# Start with the sample submission values
 best = submission['assigned_day'].tolist()
 start_score = cost_function(best)
 
 new = best.copy()
-# loop over each family
 for fam_id, _ in enumerate(best):
     # loop over each family choice
     for pick in range(10):
