@@ -8,8 +8,10 @@ from ortools.linear_solver import pywraplp
 #NUM_SWAP = 2500
 
 MAX_BEST_CHOICE = 8
-NUM_SWAP = 2500
-NUM_SECONDS = 3600
+#NUM_SWAP = 2500
+NUM_SWAP = 5000
+#NUM_SECONDS = 3600
+NUM_SECONDS = 36000
 NUM_THREADS = 6
 NUMBER_FAMILIES = 5000
 NUMBER_DAYS = 100
@@ -40,8 +42,9 @@ def get_daily_occupancy(assigned_days):
 
 # submission_69761.84.csv submission_69805.70.csv submission_69818.70.csv 
 
+df1 = pd.read_csv('./mission/submission_69668.783.csv')
 #df1 = pd.read_csv('./mission/submission_69761.84.csv')
-df1 = pd.read_csv('./mission/submission_672254.0276683343.csv')
+#df1 = pd.read_csv('./mission/submission_672254.0276683343.csv')
 assigned_days1 = df1['assigned_day'].values
 daily_occupancy1 = get_daily_occupancy(assigned_days1)
 
@@ -53,11 +56,11 @@ print('daily_occupancy1 is ', daily_occupancy1)
 print('daily_occupancy2 is ', daily_occupancy2)
 print('daily_occupancy1 equals with daily_occupancy2', daily_occupancy1==daily_occupancy2)
 
-assigned_days = assigned_days1
+assigned_days = assigned_days1.copy()
 
 #sys.exit(0)
-#for i in range(40):
-for i in range(2):
+for i in range(50):
+#for i in range(2):
     print('i is ', i)
     solver = pywraplp.Solver('Optimization preference cost', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     daily_occupancy = get_daily_occupancy(assigned_days).astype(float)
