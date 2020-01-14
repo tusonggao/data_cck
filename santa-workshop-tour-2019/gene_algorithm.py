@@ -81,12 +81,23 @@ class GA(object):
         return child
 
     def evolve(self):
-        population = set()
+        new_population_score_map = {}
         pop = self.select()
         pop_copy = pop.copy()
 
         fitness = self.get_fitness() + 1e-4     # add a small amount to avoid all zero fitness
-        idx = np.random.choice(np.arange(self.pop_size), size=self.pop_size, replace=True, p=fitness/fitness.sum())
+        idx = np.random.choice(np.arange(self.pop_size), size=2*self.pop_size, 
+                               replace=True, p=fitness/fitness.sum())
+        np.random.shuffle(idx)
+
+        for i in range(len(idx)-1):
+            parent1, parent2 = 
+            child = self.crossover(self.population_lst[idx[i]], self.population_lst[idx[i+1]])
+            child = self.mutate(child)
+            score_val = score(child)
+            if score_val > 0 and child not in new_population_score_map:
+            
+
 
         for parent in pop:  # for every parent
         for 
