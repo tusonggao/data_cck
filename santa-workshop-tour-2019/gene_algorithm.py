@@ -45,7 +45,6 @@ class GA(object):
         self.mutate_rate = mutation_rate
         self.pop_size = pop_size
         self.population_set = set()
-        self.population_score_map = set()
         #self.population = np.random.randint(*DNA_bound, size=(pop_size, DNA_size)).astype(np.int8)  # int8 for convert to ASCII
 
     def get_fitness(self):                      # count how many character matches
@@ -69,9 +68,13 @@ class GA(object):
         return parent
 
     def mutate(self, child):
+        mutate_choices = np.array([0, 1, 2, 3, 4])
+        mutate_choices_weight = np.array([5, 4, 3, 2, 1])
+        choice_idx = np.random.choice(mutate_choices, size=5000, replace=True, 
+                         p=mutate_choices_weights/mutate_choices_weights.sum())
         for point in range(self.DNA_size):
             if np.random.rand() < self.mutate_rate:
-                child[point] = np.random.randint(*self.DNA_bound)  # choose a random ASCII index
+                child[point] = choices[family_id, idx[family_id]]
         return child
 
     def evolve(self):
