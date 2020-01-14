@@ -28,19 +28,17 @@ start_t_global = time.time()
 
 lib = ctypes.CDLL('./score_double.so')
 score = lib.score
-add_up_to = lib.add_up_to
 score.restype = ctypes.c_double
 score.argtypes = [ndpointer(ctypes.c_int)]
-add_up_to.restype = ctypes.c_longlong
-add_up_to.argtypes = [ctypes.c_long]
+#add_up_to = lib.add_up_to
+#add_up_to.restype = ctypes.c_longlong
+#add_up_to.argtypes = [ctypes.c_long]
 
 #current_min_score = 672254.027668334
 
 class GA(object):
-    def __init__(self, DNA_size, DNA_bound, cross_rate, mutation_rate, pop_size=10000):
+    def __init__(self, DNA_size, DNA_bound, cross_rate, mutation_rate=4/5000, pop_size=10000):
         self.DNA_size = DNA_size
-        DNA_bound[1] += 1
-        self.DNA_bound = DNA_bound
         self.cross_rate = cross_rate
         self.mutate_rate = mutation_rate
         self.pop_size = pop_size
@@ -51,7 +49,6 @@ class GA(object):
         fitness_lst = []
         for i in range(self.population_score_map
         
-        
         match_count = (self.pop == TARGET_ASCII).sum(axis=1)
         return match_count
 
@@ -60,21 +57,23 @@ class GA(object):
         idx = np.random.choice(np.arange(self.pop_size), size=self.pop_size, replace=True, p=fitness/fitness.sum())
         return idx
 
-    def crossover(self, parent, pop):
+    def crossover(self, parent1, parent2):
+        child = parent1.copy()
         if np.random.rand() < self.cross_rate:
-            i_ = np.random.randint(0, self.pop_size, size=1)                        # select another individual from pop
+            i_ = np.random.randint(1000, 3000, size=1)     # select another individual from pop
             cross_points = np.random.randint(0, 2, self.DNA_size).astype(np.bool)   # choose crossover points
-            parent[cross_points] = pop[i_, cross_points]                            # mating and produce one child
-        return parent
+            child[cross_points:] = parent2[cross_points:]    # mating and produce one child
+        return parent1
 
     def mutate(self, child):
         mutate_choices = np.array([0, 1, 2, 3, 4])
         mutate_choices_weight = np.array([5, 4, 3, 2, 1])
         choice_idx = np.random.choice(mutate_choices, size=5000, replace=True, 
                          p=mutate_choices_weights/mutate_choices_weights.sum())
-        for point in range(self.DNA_size):
+        child = np.zeros(5000)
+        for family_id in range(5000):
             if np.random.rand() < self.mutate_rate:
-                child[point] = choices[family_id, idx[family_id]]
+                child[family_id] = choices[family_id, idx[family_id]]
         return child
 
     def evolve(self):
@@ -112,13 +111,13 @@ sys.exit(0)
 
 N_GENERATIONS = 2
 for generation in range(N_GENERATIONS):
-        fitness = ga.get_fitness()
-        best_DNA = ga.pop[np.argmax(fitness)]
-        best_phrase = ga.translateDNA(best_DNA)
-        print('Generation: ', generation, ': ', best_phrase)
-        if best_phrase == TARGET_PHRASE:
-            break
-        ga.evolve()
+    fitness = ga.get_fitness()
+    best_DNA = ga.pop[np.argmax(fitness)]
+    best_phrase = ga.translateDNA(best_DNA)
+    print('Generation: ', generation, ': ', best_phrase)
+    if best_phrase == TARGET_PHRASE:
+        break
+    ga.evolve()
 
 print('prog ends here! total cost time: ', time.time() - start_t_global)
 
