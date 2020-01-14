@@ -3,6 +3,7 @@ nohup.out
 optimize_main
 optimize_main_from_scratch
 *.csv
+*.swp
 running_output*
 atad/
 data/

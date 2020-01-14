@@ -6,7 +6,8 @@ TARGET_PHRASE = 'If you are clear enough, You get it!'       # target DNA
 POP_SIZE = 300                      # population size
 CROSS_RATE = 0.4                    # mating probability (DNA crossover)
 MUTATION_RATE = 0.01                # mutation probability
-N_GENERATIONS = 1000
+#N_GENERATIONS = 1000
+N_GENERATIONS = 10**10
 
 DNA_SIZE = len(TARGET_PHRASE)
 TARGET_ASCII = np.fromstring(TARGET_PHRASE, dtype=np.uint8)  # convert string to number
