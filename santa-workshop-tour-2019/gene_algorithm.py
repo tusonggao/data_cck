@@ -37,7 +37,7 @@ add_up_to.argtypes = [ctypes.c_long]
 #current_min_score = 672254.027668334
 
 class GA(object):
-    def __init__(self, DNA_size, DNA_bound, cross_rate, mutation_rate, pop_size):
+    def __init__(self, DNA_size, DNA_bound, cross_rate, mutation_rate, pop_size=10000):
         self.DNA_size = DNA_size
         DNA_bound[1] += 1
         self.DNA_bound = DNA_bound
@@ -45,10 +45,13 @@ class GA(object):
         self.mutate_rate = mutation_rate
         self.pop_size = pop_size
         self.population_set = set()
-        self.population = set()
+        self.population_score_map = set()
         #self.population = np.random.randint(*DNA_bound, size=(pop_size, DNA_size)).astype(np.int8)  # int8 for convert to ASCII
 
     def get_fitness(self):                      # count how many character matches
+        fitness_lst = []
+        for i in range(self.population_score_map
+        
         
         match_count = (self.pop == TARGET_ASCII).sum(axis=1)
         return match_count
@@ -56,7 +59,7 @@ class GA(object):
     def select(self):
         fitness = self.get_fitness() + 1e-4     # add a small amount to avoid all zero fitness
         idx = np.random.choice(np.arange(self.pop_size), size=self.pop_size, replace=True, p=fitness/fitness.sum())
-        return self.pop[idx]
+        return idx
 
     def crossover(self, parent, pop):
         if np.random.rand() < self.cross_rate:
@@ -75,6 +78,7 @@ class GA(object):
         pop = self.select()
         pop_copy = pop.copy()
         for parent in pop:  # for every parent
+        for 
             child = self.crossover(parent, pop_copy)
             child = self.mutate(child)
             parent[:] = child
@@ -89,24 +93,10 @@ print('choices.shape is ', choices.shape)
 
 sys.exit(0)
 
-def get_gene_child_assignment(assigned_days_1, assigned_days_2, gene_prob=0.05, mutation_prob=10e-4):
-    length = len(assigned_days_1)
-    probs = np.random.rand(length)
-    new_days = assigned_days_1.copy()
-    random_days = np.random.randint(low=1, high=101, size=5000)
-    for i in range(length):
-        if probs[i] < mutation_prob:
-            new_days[i] = random_days[i]
-        elif probs[i] < gene_prob:
-            new_days[i] = assigned_days_2[i] 
-    assignment = {i:new_days[i] for i in range(5000)}
-    return assignment
-
 def store_assignment(assignment, score, current_min=False):
     print('in store_assignment(), score is ', score)
     outcome_df = pd.DataFrame({'family_id': range(5000), 'assigned_day': list(assignment)})
     outcome_df.to_csv('./submission/min_gene/submission_tsg_{:.5f}.csv'.format(score), index=False)
-
     
 df_seed1 = pd.read_csv('./mission/min_iterative/submission_tsg_358314.23221.csv')
 assigned_days = df_seed1.assigned_day.values.astype(np.int32)
