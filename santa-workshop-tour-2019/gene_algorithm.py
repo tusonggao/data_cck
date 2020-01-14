@@ -45,11 +45,15 @@ class GA(object):
         self.population_set = set()
         #self.population = np.random.randint(*DNA_bound, size=(pop_size, DNA_size)).astype(np.int8)  # int8 for convert to ASCII
 
-    def get_fitness(self):                      # count how many character matches
+    def first_read(self):
+        file_names = get_all_files('./mission/min_iterative/')
+        for file_name in file_names:
+            assigned_days = pd.read_csv(file_name)['assigned_day'].values.astype(np.int32)
+            self.population_set.add(assigned_days)
+
+    def get_fitness(self):   # count how many character matches
         fitness_lst = []
-        for i in range(self.population_score_map
-        
-        match_count = (self.pop == TARGET_ASCII).sum(axis=1)
+        for i in range(self.population_set):
         return match_count
 
     def select(self):
@@ -70,20 +74,22 @@ class GA(object):
         mutate_choices_weight = np.array([5, 4, 3, 2, 1])
         choice_idx = np.random.choice(mutate_choices, size=5000, replace=True, 
                          p=mutate_choices_weights/mutate_choices_weights.sum())
-        child = np.zeros(5000)
         for family_id in range(5000):
             if np.random.rand() < self.mutate_rate:
-                child[family_id] = choices[family_id, idx[family_id]]
+                child[family_id] = choices[family_id, choice_idx[family_id]]
         return child
 
     def evolve(self):
+        population = set()
         pop = self.select()
         pop_copy = pop.copy()
+
         for parent in pop:  # for every parent
         for 
             child = self.crossover(parent, pop_copy)
             child = self.mutate(child)
             parent[:] = child
+        self.select(population)
         self.pop = pop
 
 
