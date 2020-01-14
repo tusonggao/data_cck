@@ -110,7 +110,6 @@ def convert(chromosome):
     return indexes
 
 def selection(population, selection_size, group_size):
-
     parents = []
     for i in range(selection_size):
         minimum = 9999999999999999999
@@ -124,10 +123,14 @@ def selection(population, selection_size, group_size):
         parents.append(population[index])
                 
     return parents
+
         
+
 def crossover(p1, p2):
+    p = []
+    
     p = [p1[i] for i in range(50000)]
-    for i in range(50000, 100000):
+    for i in range(0, 500000):
         p.append(p2[i])
     for i in range(100000, 150000):
         p.append(p1[i])
@@ -146,6 +149,7 @@ def crossover(p1, p2):
     for i in range(450000, 500000):
         p.append(p2[i])
     return p
+
 
 def mutation(family_matrix, chromosome, desired_rate=10):
     family_number = np.random.randint(5000)
@@ -207,12 +211,4 @@ for i in range(20):
 sub = convert(best)
 submission['assigned_day'] = sub
 submission.to_csv('./mission/gene_output/submission.csv', index=False)
-
-
-
-
-
-
-
-
 
