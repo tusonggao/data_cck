@@ -40,11 +40,10 @@ def get_daily_occupancy(assigned_days):
     daily_occupancy = np.array([daily_occupancy[i+1] for i in range(NUMBER_DAYS)])
     return daily_occupancy
 
-# submission_69761.84.csv submission_69805.70.csv submission_69818.70.csv 
 
-df1 = pd.read_csv('./mission/submission_69668.783.csv')
+#df1 = pd.read_csv('./mission/submission_69668.783.csv')
 #df1 = pd.read_csv('./mission/submission_69761.84.csv')
-#df1 = pd.read_csv('./mission/submission_672254.0276683343.csv')
+df1 = pd.read_csv('./mission/submission_672254.028.csv')
 assigned_days1 = df1['assigned_day'].values
 daily_occupancy1 = get_daily_occupancy(assigned_days1)
 
