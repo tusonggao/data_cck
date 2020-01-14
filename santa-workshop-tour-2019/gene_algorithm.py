@@ -52,6 +52,7 @@ class GA(object):
             self.population_set.add(assigned_days)
 
     def get_fitness(self):   # count how many character matches
+        self.population_lst = list(self.population_set)
         fitness_lst = []
         for i in range(self.population_set):
         return match_count
@@ -83,6 +84,9 @@ class GA(object):
         population = set()
         pop = self.select()
         pop_copy = pop.copy()
+
+        fitness = self.get_fitness() + 1e-4     # add a small amount to avoid all zero fitness
+        idx = np.random.choice(np.arange(self.pop_size), size=self.pop_size, replace=True, p=fitness/fitness.sum())
 
         for parent in pop:  # for every parent
         for 
