@@ -136,8 +136,7 @@ def load_and_prec():
 
 train_X, val_X, test_X, train_y, val_y, word_index = load_and_prec()
 print('after load_and_prec train_X.shape is ', train_X.shape, 'val_X.shape is ', val_X.shape)
-
-sys.exit(0)
+#sys.exit(0)
 
 # Word 2 vec Embedding
 
@@ -146,24 +145,40 @@ def load_glove(word_index):
     '''
     print('in load_glove')
     EMBEDDING_FILE = '/home/ubuntu/tsg/word2vecLib/glove.840B.300d/glove.840B.300d.txt'
-    def get_coefs(word,*arr): return word, np.asarray(arr, dtype='float32')
+
+    start_t = time.time()
+    def get_coefs(word,*arr): 
+        return word, np.asarray(arr, dtype='float32')
     embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE))
+    print('reading embeddings_index from file cost time: ', time.time()-start_t, 
+          'len of embeddings_index is ', len(embeddings_index))
 
     all_embs = np.stack(embeddings_index.values())
-    emb_mean,emb_std = -0.005838499,0.48782197
+    print('all_embs.mean is ', all_embs.mean(), 'all_embs.std is ', all_embs.std())
+
+    emb_mean, emb_std = -0.005838499,0.48782197
     embed_size = all_embs.shape[1]
 
     # word_index = tokenizer.word_index
     nb_words = min(max_features, len(word_index))
     embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, embed_size))
+    missing_num = 0
     for word, i in word_index.items():
-        if i >= max_features: continue
+        if i >= max_features: 
+            continue
         embedding_vector = embeddings_index.get(word)
-        if embedding_vector is not None: embedding_matrix[i] = embedding_vector
-            
+        if embedding_vector is not None: 
+            embedding_matrix[i] = embedding_vector
+        else:
+            missing_num += 1
+    print('missing_num is ', missing_num)
+     
     return embedding_matrix 
 
 embedding_matrix = load_glove(word_index)
+print('embedding_matrix.shape is ', embedding_matrix.shape)
+
+sys.exit(0)
 
 def dot_product(x, kernel):
     """
