@@ -54,11 +54,11 @@ def clean_text(x):
     return x
 
 print('prog ends here 111')
-
-sys.exit(0)
+#sys.exit(0)
 
 # Loading the data
 def load_and_prec():
+    print('in load_and_prec()')
     train_df = pd.read_csv("./atad/train.csv")
     test_df = pd.read_csv("./atad/test.csv")
     
@@ -135,7 +135,7 @@ def load_and_prec():
 
 
 train_X, val_X, test_X, train_y, val_y, word_index = load_and_prec()
-print('train_X.shape is ', train_X.shape, 'val_X.shape is ', val_X.shape)
+print('after load_and_prec train_X.shape is ', train_X.shape, 'val_X.shape is ', val_X.shape)
 
 sys.exit(0)
 
@@ -144,7 +144,8 @@ sys.exit(0)
 def load_glove(word_index):
     '''We want to create an embedding matrix in which we keep only the word2vec for words which are in our word_index
     '''
-    EMBEDDING_FILE = '../input/embeddings/glove.840B.300d/glove.840B.300d.txt'
+    print('in load_glove')
+    EMBEDDING_FILE = '/home/ubuntu/tsg/word2vecLib/glove.840B.300d/glove.840B.300d.txt'
     def get_coefs(word,*arr): return word, np.asarray(arr, dtype='float32')
     embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE))
 
