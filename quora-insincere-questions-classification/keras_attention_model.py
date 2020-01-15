@@ -1,7 +1,12 @@
 # https://www.kaggle.com/mlwhiz/learning-text-classification-attention
 
 import os
+import sys
 import time
+import gc
+import re
+import glob
+
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 from tqdm import tqdm
@@ -21,7 +26,6 @@ from keras import backend as K
 from keras.engine.topology import Layer
 from keras import initializers, regularizers, constraints, optimizers, layers
 
-
 from keras.layers import *
 from keras.models import *
 from keras import initializers, regularizers, constraints, optimizers, layers
@@ -30,12 +34,6 @@ from keras.optimizers import *
 import keras.backend as K
 from keras.callbacks import *
 import tensorflow as tf
-import os
-import time
-import gc
-import re
-import glob
-
 
 # Define some Global Variables
 max_features = 100000 # Maximum Number of words we want to include in our dictionary
