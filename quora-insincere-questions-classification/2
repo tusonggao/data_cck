@@ -178,8 +178,9 @@ def load_glove(word_index):
      
     return embedding_matrix 
 
-embedding_matrix = load_glove(word_index)
-#embedding_matrix = np.random.normal(-0.005838499,0.48782197, (100000, 300))
+#embedding_matrix = load_glove(word_index)
+
+embedding_matrix = np.random.normal(-0.005838499,0.48782197, (100000, 300))
 print('embedding_matrix.shape is ', embedding_matrix.shape)
 #embedding_matrix.shape is  (100000, 300)
 #sys.exit(0)
@@ -307,8 +308,10 @@ def model_lstm_atten(embedding_matrix):
 
 model = model_lstm_atten(embedding_matrix)
 model.summary()
+
 print('get here 333')
-#sys.exit(0)
+
+sys.exit(0)
 
 def focal_loss(gamma=2, alpha=0.75):
     def focal_loss_fixed(y_true, y_pred):#with tensorflow
@@ -337,6 +340,7 @@ print('get here 444')
 start_t = time.time()
 pred_val_y, pred_test_y = train_pred(model, epochs=15)
 print('train_pred cost time time: ', time.time() - start_t)
+
 
 '''
 A function specific to this competition since the organizers don't want probabilities 
@@ -367,7 +371,6 @@ test_df = pd.read_csv("./atad/test.csv", usecols=["qid"])
 out_df = pd.DataFrame({"qid":test_df["qid"].values})
 out_df['prediction'] = pred_test_y
 out_df.to_csv("./mission/submission.csv", index=False)
-out_df.to_csv(f"./mission/submission_{f1}.csv", index=False)
 
 print('prog ends here')
 
