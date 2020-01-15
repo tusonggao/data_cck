@@ -1,5 +1,5 @@
+# https://mlwhiz.com/blog/2018/12/17/text_classification/
 # https://www.kaggle.com/mlwhiz/learning-text-classification-attention
-
 import os
 import sys
 import time
@@ -46,16 +46,21 @@ puncts = [',', '.', '"', ':', ')', '(', '-', '!', '?', '|', ';', "'", '$', '&', 
  '“', '★', '”', '–', '●', 'â', '►', '−', '¢', '²', '¬', '░', '¶', '↑', '±', '¿', '▾', '═', '¦', '║', '―', '¥', '▓', '—', '‹', '─', 
  '▒', '：', '¼', '⊕', '▼', '▪', '†', '■', '’', '▀', '¨', '▄', '♫', '☆', 'é', '¯', '♦', '¤', '▲', 'è', '¸', '¾', 'Ã', '⋅', '‘', '∞', 
  '∙', '）', '↓', '、', '│', '（', '»', '，', '♪', '╩', '╚', '³', '・', '╦', '╣', '╔', '╗', '▬', '❤', 'ï', 'Ø', '¹', '≤', '‡', '√', ]
+
 def clean_text(x):
     x = str(x)
     for punct in puncts:
         x = x.replace(punct, f' {punct} ')
     return x
 
+print('prog ends here 111')
+
+sys.exit(0)
+
 # Loading the data
 def load_and_prec():
-    train_df = pd.read_csv("../input/train.csv")
-    test_df = pd.read_csv("../input/test.csv")
+    train_df = pd.read_csv("./atad/train.csv")
+    test_df = pd.read_csv("./atad/test.csv")
     
     print("Train shape : ",train_df.shape)
     print("Test shape : ",test_df.shape)
@@ -124,7 +129,7 @@ def load_and_prec():
     train_X = train_X[trn_idx]
     val_X = val_X[val_idx]
     train_y = train_y[trn_idx]
-    val_y = val_y[val_idx]    
+    val_y = val_y[val_idx] 
     
     return train_X, val_X, test_X, train_y, val_y, tokenizer.word_index
 
