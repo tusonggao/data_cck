@@ -17,8 +17,8 @@ using namespace std::chrono;
 
 
 // You can setup how many families you need for swaps and what best choice use for each family 
-constexpr array<uint8_t, 14> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5}; 
-//constexpr array<uint8_t, 16> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 5}; 
+//constexpr array<uint8_t, 14> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5}; 
+constexpr array<uint8_t, 16> DISTRIBUTION{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 5}; 
 // {2, 5} it's mean the first random family will brute force for choices 1-2 and the second random family will brute force for choices 1-5 
 
 constexpr int MAX_OCCUPANCY = 300;
