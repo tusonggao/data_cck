@@ -4,6 +4,8 @@ atad/
 submission/
 mission/
 tsg_personal/
+*.zip
+nohup.out
 *.mylogs
 *.tsg
 *.html
