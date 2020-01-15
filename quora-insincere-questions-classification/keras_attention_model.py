@@ -152,10 +152,12 @@ def load_glove(word_index):
     embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE))
     print('reading embeddings_index from file cost time: ', time.time()-start_t, 
           'len of embeddings_index is ', len(embeddings_index))
+    # reading embeddings_index from file cost time:  159.24290013313293 len of embeddings_index is  2196016
 
     all_embs = np.stack(embeddings_index.values())
     print('all_embs.mean is ', all_embs.mean(), 'all_embs.std is ', all_embs.std())
 
+    #all_embs.mean is  -0.005838499 all_embs.std is  0.48782197
     emb_mean, emb_std = -0.005838499,0.48782197
     embed_size = all_embs.shape[1]
 
@@ -172,13 +174,14 @@ def load_glove(word_index):
         else:
             missing_num += 1
     print('missing_num is ', missing_num)
+    #missing_num is  17099
      
     return embedding_matrix 
 
 embedding_matrix = load_glove(word_index)
 print('embedding_matrix.shape is ', embedding_matrix.shape)
-
-sys.exit(0)
+#embedding_matrix.shape is  (100000, 300)
+#sys.exit(0)
 
 def dot_product(x, kernel):
     """
@@ -216,11 +219,9 @@ class AttentionWithContext(Layer):
         # next add a Dense layer (for classification/regression) or whatever...
     """
 
-    def __init__(self,
-                 W_regularizer=None, u_regularizer=None, b_regularizer=None,
-                 W_constraint=None, u_constraint=None, b_constraint=None,
-                 bias=True, **kwargs):
-
+    def __init__(self, W_regularizer=None, u_regularizer=None, 
+                 b_regularizer=None, W_constraint=None, u_constraint=None, 
+                 b_constraint=None, bias=True, **kwargs):
         self.supports_masking = True
         self.init = initializers.get('glorot_uniform')
 
@@ -305,6 +306,8 @@ def model_lstm_atten(embedding_matrix):
 
 model = model_lstm_atten(embedding_matrix)
 model.summary()
+
+sys.exit(0)
 
 def focal_loss(gamma=2, alpha=0.75):
     def focal_loss_fixed(y_true, y_pred):#with tensorflow
