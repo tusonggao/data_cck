@@ -30,6 +30,7 @@ lib = ctypes.CDLL('./score_double.so')
 score = lib.score
 score.restype = ctypes.c_double
 score.argtypes = [ndpointer(ctypes.c_int)]
+
 #add_up_to = lib.add_up_to
 #add_up_to.restype = ctypes.c_longlong
 #add_up_to.argtypes = [ctypes.c_long]
@@ -82,8 +83,6 @@ class GA(object):
 
     def evolve(self):
         new_population_score_map = {}
-        pop = self.select()
-        pop_copy = pop.copy()
 
         fitness = self.get_fitness() + 1e-4     # add a small amount to avoid all zero fitness
         idx = np.random.choice(np.arange(self.pop_size), size=2*self.pop_size, 
@@ -96,8 +95,14 @@ class GA(object):
             child = self.mutate(child)
             score_val = score(child)
             if score_val > 0 and child not in new_population_score_map:
-            
+                new_population_score_map[child] = score_val
+            if len(new_population_score_map) > 2*self.pop_size:
+                break
 
+        pair_lst = [(child, score) for child, score in new_population_score_map.items()]
+        pair_lst = sorted(pair_lst, key=lambda x: -x[1]) #倒序
+         
+        ttt
 
         for parent in pop:  # for every parent
         for 
