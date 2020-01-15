@@ -135,6 +135,9 @@ def load_and_prec():
 
 
 train_X, val_X, test_X, train_y, val_y, word_index = load_and_prec()
+print('train_X.shape is ', train_X.shape, 'val_X.shape is ', val_X.shape)
+
+sys.exit(0)
 
 # Word 2 vec Embedding
 
