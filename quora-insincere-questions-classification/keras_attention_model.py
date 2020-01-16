@@ -134,8 +134,10 @@ def load_and_prec():
     return train_X, val_X, test_X, train_y, val_y, tokenizer.word_index
 
 
+start_t = time.time()
 train_X, val_X, test_X, train_y, val_y, word_index = load_and_prec()
 print('after load_and_prec train_X.shape is ', train_X.shape, 'val_X.shape is ', val_X.shape)
+print('load_and_prec cost time: ', time.time() - start_t)
 #sys.exit(0)
 
 # Word 2 vec Embedding
