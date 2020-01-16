@@ -6,6 +6,7 @@ mission/
 tsg_personal/
 *.h5
 *.zip
+running_output*
 nohup.out
 *.mylogs
 *.tsg
