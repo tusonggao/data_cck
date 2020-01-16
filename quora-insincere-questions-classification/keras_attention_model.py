@@ -297,7 +297,8 @@ class AttentionWithContext(Layer):
 def model_lstm_atten(embedding_matrix):
     print('in model_lstm_atten')
     inp = Input(shape=(maxlen,))
-    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+    #x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=True)(inp)
     x = Bidirectional(CuDNNLSTM(128, return_sequences=True))(x)
     x = Bidirectional(CuDNNLSTM(64, return_sequences=True))(x)
     x = AttentionWithContext()(x)
@@ -368,8 +369,8 @@ pred_test_y = (pred_test_y > threshold).astype(int)
 test_df = pd.read_csv("./atad/test.csv", usecols=["qid"])
 out_df = pd.DataFrame({"qid":test_df["qid"].values})
 out_df['prediction'] = pred_test_y
-out_df.to_csv("./mission/submission.csv", index=False)
-out_df.to_csv(f"./mission/submission_{f1}.csv", index=False)
+out_df.to_csv("./mission/submission_1.csv", index=False)
+out_df.to_csv(f"./mission/submission_{f1:.5f}.csv", index=False)
 
 print('prog ends here')
 
