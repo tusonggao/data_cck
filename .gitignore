@@ -4,6 +4,7 @@ atad/
 submission/
 mission/
 tsg_personal/
+*.hdf5
 *.h5
 *.zip
 running_output*
