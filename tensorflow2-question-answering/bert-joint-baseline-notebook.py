@@ -9,9 +9,9 @@ import tensorflow as tf
 sys.path.extend([#'../input/tf2_0_baseline_w_bert/',#'../input/bert_modeling/',
                  '../input/bert-joint-baseline/'])
 import bert_utils
-import modeling 
+from bert import modeling 
 #import bert_optimization as optimization
-import tokenization
+from bert import tokenization
 import json
 
 #tf.compat.v1.disable_eager_execution()
@@ -19,25 +19,26 @@ import json
 # For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
 # In this case, we've got some extra BERT model files under `/kaggle/input/bertjointbaseline`
 
-import os
 for dirname, _, filenames in os.walk('/kaggle/input'):
     for filename in filenames:
         print(os.path.join(dirname, filename))
 
 
 on_kaggle_server = os.path.exists('/kaggle')
-nq_test_file = '../input/tensorflow2-question-answering/simplified-nq-test.jsonl' 
+nq_test_file = './atad/simplified-nq-test.jsonl' 
 public_dataset = os.path.getsize(nq_test_file)<20_000_000
 private_dataset = os.path.getsize(nq_test_file)>=20_000_000
+
+print('public_dataset is ', public_dataset)
+print('private_dataset is ', private_dataset)
 
 if True:
     import importlib
     importlib.reload(bert_utils)
 
-with open('../input/bert-joint-baseline/bert_config.json','r') as f:
+with open('./atad/bert-joint-baseline/bert_config.json','r') as f:
     config = json.load(f)
 print(json.dumps(config,indent=4))
-
 
 class TDense(tf.keras.layers.Layer):
     def __init__(self,
@@ -101,10 +102,6 @@ def mk_model(config):
                           [unique_id,start_logits,end_logits,ans_type],
                           name='bert-baseline')    
 
-
-# In[6]:
-
-
 small_config = config.copy()
 small_config['vocab_size']=16
 small_config['hidden_size']=64
@@ -114,21 +111,10 @@ small_config['num_attention_heads'] = 4
 small_config['intermediate_size'] = 256
 small_config
 
-
-# In[7]:
-
-
 model= mk_model(config)
-
-
-# In[8]:
-
-
 model.summary()
 
-
-# In[9]:
-
+print('prog ends here 222')
 
 if False:
     model_params = {v.name:v for v in model.trainable_variables}
@@ -167,14 +153,15 @@ if False:
 
 
 cpkt = tf.train.Checkpoint(model=model)
-cpkt.restore('../input/bert-joint-baseline/model_cpkt-1').assert_consumed()
+cpkt.restore('./atad/bert-joint-baseline/model_cpkt-1').assert_consumed()
 
+print('prog ends here 333')
 
 # In[11]:
 
 
 import tqdm
-eval_records = "../input/bert-joint-baseline/nq-test.tfrecords"
+eval_records = "./atad/bert-joint-baseline/nq-test.tfrecords"
 #nq_test_file = '../input/tensorflow2-question-answering/simplified-nq-test.jsonl'
 if on_kaggle_server and private_dataset:
     eval_records='nq-test.tfrecords'
@@ -184,7 +171,7 @@ if not os.path.exists(eval_records):
         filename=os.path.join(eval_records),
         is_training=False)
 
-    tokenizer = tokenization.FullTokenizer(vocab_file='../input/bert-joint-baseline/vocab-nq.txt', 
+    tokenizer = tokenization.FullTokenizer(vocab_file='./atad/bert-joint-baseline/vocab-nq.txt', 
                                            do_lower_case=True)
 
     features = []
@@ -247,6 +234,8 @@ token_map_ds = raw_ds.map(_decode_tokens)
 decoded_ds = raw_ds.map(_decode_record)
 ds = decoded_ds.batch(batch_size=16,drop_remainder=False)
 
+print('prog ends here 444')
+
 
 # In[14]:
 
@@ -260,12 +249,17 @@ ds = decoded_ds.batch(batch_size=16,drop_remainder=False)
 result=model.predict_generator(ds,verbose=1 if not on_kaggle_server else 0)
 
 
+
+
 # In[16]:
 
 
 np.savez_compressed('bert-joint-baseline-output.npz',
                     **dict(zip(['uniqe_id','start_logits','end_logits','answer_type_logits'],
                                result)))
+
+print('prog ends here 555')
+sys.exit(0)
 
 
 # In[17]:
