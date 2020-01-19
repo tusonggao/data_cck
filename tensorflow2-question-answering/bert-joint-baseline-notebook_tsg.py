@@ -1,4 +1,5 @@
 #  https://www.kaggle.com/kernels/scriptcontent/24654997/download
+# this one: https://www.kaggle.com/tusonggao/bert-joint
 import os
 import sys
 import time
@@ -8,13 +9,13 @@ import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import tensorflow as tf
 tf.enable_eager_execution()
 
+global_start_t = time.time()
+
 print('sys.path is ', sys.path)
 sys.path = ['./atad/bert-joint-baseline/'] + sys.path
 
 import bert_utils
-
 import modeling 
-#import bert_optimization as optimization
 import tokenization
 import json
 
@@ -55,11 +56,12 @@ class TDense(tf.keras.layers.Layer):
                  output_size,
                  kernel_initializer=None,
                  bias_initializer="zeros",
-                **kwargs):
+                 **kwargs):
         super().__init__(**kwargs)
         self.output_size = output_size
         self.kernel_initializer = kernel_initializer
         self.bias_initializer = bias_initializer
+
     def build(self,input_shape):
         dtype = tf.as_dtype(self.dtype or tf.keras.backend.floatx())
         if not (dtype.is_floating or dtype.is_complex):
@@ -87,8 +89,9 @@ class TDense(tf.keras.layers.Layer):
             dtype=self.dtype,
             trainable=True)
         super(TDense, self).build(input_shape)
-    def call(self,x):
-        return tf.matmul(x,self.kernel,transpose_b=True)+self.bias
+
+    def call(self, x):
+        return tf.matmul(x, self.kernel, transpose_b=True)+self.bias
     
 def mk_model(config):
     seq_len = config['max_position_embeddings']
@@ -112,67 +115,45 @@ def mk_model(config):
                           [unique_id,start_logits,end_logits,ans_type],
                           name='bert-baseline')    
 
-small_config = config.copy()
-small_config['vocab_size']=16
-small_config['hidden_size']=64
-small_config['max_position_embeddings'] = 32
-small_config['num_hidden_layers'] = 4
-small_config['num_attention_heads'] = 4
-small_config['intermediate_size'] = 256
-small_config
-
 model= mk_model(config)
 model.summary()
 
 print('prog ends here 222')
-
-if False:
-    model_params = {v.name:v for v in model.trainable_variables}
-    model_roots = np.unique([v.name.split('/')[0] for v in model.trainable_variables])
-    print(model_roots)
-    saved_names = [k for k,v in tf.train.list_variables('../input/bertjointbaseline/bert_joint.ckpt')]
-    a_map = {v:v+':0' for v in saved_names}
-    model_roots = np.unique([v.name.split('/')[0] for v in model.trainable_variables])
-    def transform(x):
-        x = x.replace('attention/self','attention')
-        x = x.replace('attention','self_attention')
-        x = x.replace('attention/output','attention_output')  
-
-        x = x.replace('/dense','')
-        x = x.replace('/LayerNorm','_layer_norm')
-        x = x.replace('embeddings_layer_norm','embeddings/layer_norm')  
-
-        x = x.replace('attention_output_layer_norm','attention_layer_norm')  
-        x = x.replace('embeddings/word_embeddings','word_embeddings/embeddings')
-
-        x = x.replace('/embeddings/','/embedding_postprocessor/')  
-        x = x.replace('/token_type_embeddings','/type_embeddings')  
-        x = x.replace('/pooler/','/pooler_transform/')  
-        x = x.replace('answer_type_output_bias','ans_type/bias')  
-        x = x.replace('answer_type_output_','ans_type/')
-        x = x.replace('cls/nq/output_','logits/')
-        x = x.replace('/weights','/kernel')
-
-        return x
-    a_map = {k:model_params.get(transform(v),None) for k,v in a_map.items() if k!='global_step'}
-    tf.compat.v1.train.init_from_checkpoint(ckpt_dir_or_file='../input/bertjointbaseline/bert_joint.ckpt',
-                                            assignment_map=a_map)
-
-
-# In[10]:
-
 
 cpkt = tf.train.Checkpoint(model=model)
 cpkt.restore('./atad/bert-joint-baseline/model_cpkt-1').assert_consumed()
 
 print('prog ends here 333')
 
+class DummyObject:
+    def __init__(self,**kwargs):
+        self.__dict__.update(kwargs)
+
+FLAGS=DummyObject(skip_nested_contexts=True, #True
+                  max_position=50,
+                  max_contexts=48,
+                  max_query_length=64,
+                  max_seq_length=512, #512
+                  doc_stride=128,
+                  include_unknowns=0.02, #0.02
+                  n_best_size=5, #20
+                  max_answer_length=30, #30
+                  warmup_proportion=0.1,
+                  learning_rate=1e-5,
+                  num_train_epochs=3.0,
+                  train_batch_size=32,
+                  num_train_steps=100000,
+                  num_warmup_steps=10000,
+                  max_eval_steps=100,
+                  use_tpu=False,
+                  eval_batch_size=8, 
+                  max_predictions_per_seq=20)
+
+
 eval_records = "./atad/bert-joint-baseline/nq-test.tfrecords"
-#nq_test_file = '../input/tensorflow2-question-answering/simplified-nq-test.jsonl'
 if on_kaggle_server and private_dataset:
     eval_records='nq-test.tfrecords'
 if not os.path.exists(eval_records):
-    # tf2baseline.FLAGS.max_seq_length = 512
     eval_writer = bert_utils.FeatureWriter(
         filename=os.path.join(eval_records),
         is_training=False)
@@ -182,9 +163,9 @@ if not os.path.exists(eval_records):
 
     features = []
     convert = bert_utils.ConvertExamples2Features(tokenizer=tokenizer,
-                                                   is_training=False,
-                                                   output_fn=eval_writer.process_feature,
-                                                   collect_stat=False)
+                                                  is_training=False,
+                                                  output_fn=eval_writer.process_feature,
+                                                  collect_stat=False)
 
     n_examples = 0
     tqdm_notebook= tqdm.tqdm_notebook if not on_kaggle_server else None
@@ -197,7 +178,8 @@ if not os.path.exists(eval_records):
     eval_writer.close()
     print('number of test examples: %d, written to file: %d' % (n_examples,eval_writer.num_features))
 
-seq_length = bert_utils.FLAGS.max_seq_length #config['max_position_embeddings']
+seq_length = FLAGS.max_seq_length #config['max_position_embeddings']
+
 name_to_features = {
       "unique_id": tf.io.FixedLenFeature([], tf.int64),
       "input_ids": tf.io.FixedLenFeature([seq_length], tf.int64),
@@ -233,8 +215,6 @@ ds = decoded_ds.batch(batch_size=32, drop_remainder=False)
 
 print('prog ends here 444')
 
-# next(iter(decoded_ds))
-
 start_t = time.time()
 result = model.predict_generator(ds, verbose=1 if not on_kaggle_server else 0)
 print('model.predict_generator cost time: ', time.time() - start_t)
@@ -246,7 +226,24 @@ np.savez_compressed('bert-joint-baseline-output.npz',
                                result)))
 
 print('prog ends here 555')
-sys.exit(0)
+#sys.exit(0)
+
+Span = collections.namedtuple("Span", ["start_token_idx", "end_token_idx", "score"])
+
+class ScoreSummary(object):
+    def __init__(self):
+        self.predicted_label = None
+        self.short_span_score = None
+        self.cls_token_score = None
+        self.answer_type_logits = None
+
+class EvalExample(object):
+    """Eval data available for a single example."""
+    def __init__(self, example_id, candidates):
+        self.example_id = example_id
+        self.candidates = candidates
+        self.results = {}
+        self.features = {}
 
 def get_best_indexes(logits, n_best_size):
   """Get the n-best logits from a list."""
@@ -258,93 +255,129 @@ def get_best_indexes(logits, n_best_size):
       break
     best_indexes.append(index_and_score[i][0])
   return best_indexes
+
 def top_k_indices(logits,n_best_size,token_map):
     indices = np.argsort(logits[1:])+1
     indices = indices[token_map[indices]!=-1]
     return indices[-n_best_size:]
+
+def remove_duplicates(span):
+    start_end = []
+    for s in span:
+        cont = 0
+        if not start_end:
+            start_end.append(Span(s[0], s[1], s[2]))
+            cont += 1
+        else:
+            for i in range(len(start_end)):
+                if start_end[i][0] == s[0] and start_end[i][1] == s[1]:
+                    cont += 1
+        if cont == 0:
+            start_end.append(Span(s[0], s[1], s[2]))
+    return start_end
+
+def get_short_long_span(predictions, example):
+    sorted_predictions = sorted(predictions, reverse=True)
+    short_span = []
+    long_span = []
+    for prediction in sorted_predictions:
+        score, _, summary, start_span, end_span = prediction
+        # get scores > zero
+        if score > 0:
+            short_span.append(Span(int(start_span), int(end_span), float(score)))
+
+    short_span = remove_duplicates(short_span)
+
+    for s in range(len(short_span)):
+        for c in example.candidates:
+            start = short_span[s].start_token_idx
+            end = short_span[s].end_token_idx
+            ## print(c['top_level'],c['start_token'],start,c['end_token'],end)
+            if c["top_level"] and c["start_token"] <= start and c["end_token"] >= end:
+                long_span.append(Span(int(c["start_token"]), int(c["end_token"]), float(short_span[s].score)))
+                break
+    long_span = remove_duplicates(long_span)
+    if not long_span:
+        long_span = [Span(-1, -1, -10000.0)]
+    if not short_span:
+        short_span = [Span(-1, -1, -10000.0)]
     
-    
+    return short_span, long_span
+
 def compute_predictions(example):
-  """Converts an example into an NQEval object for evaluation."""
-  predictions = []
-  n_best_size = 10
-  max_answer_length = 30
+    """Converts an example into an NQEval object for evaluation."""
+    predictions = []
+    n_best_size = FLAGS.n_best_size
+    max_answer_length = FLAGS.max_answer_length
+    i = 0
+    for unique_id, result in example.results.items():
+        if unique_id not in example.features:
+            raise ValueError("No feature found with unique_id:", unique_id)
+        token_map = np.array(example.features[unique_id]["token_map"]) #.int64_list.value
+        start_indexes = top_k_indices(result.start_logits,n_best_size,token_map)
+        if len(start_indexes)==0:
+            continue
+        end_indexes   = top_k_indices(result.end_logits,n_best_size,token_map)
+        if len(end_indexes)==0:
+            continue
+        indexes = np.array(list(np.broadcast(start_indexes[None],end_indexes[:,None])))  
+        indexes = indexes[(indexes[:,0]<indexes[:,1])*(indexes[:,1]-indexes[:,0]<max_answer_length)]
+        for _, (start_index,end_index) in enumerate(indexes):  
+            summary = ScoreSummary()
+            summary.short_span_score = (
+                result.start_logits[start_index] +
+                result.end_logits[end_index])
+            summary.cls_token_score = (
+                result.start_logits[0] + result.end_logits[0])
+            summary.answer_type_logits = result.answer_type_logits-result.answer_type_logits.mean()
+            start_span = token_map[start_index]
+            end_span = token_map[end_index] + 1
 
-  for unique_id, result in example.results.items():
-    if unique_id not in example.features:
-      raise ValueError("No feature found with unique_id:", unique_id)
-    token_map = np.array(example.features[unique_id]["token_map"]) #.int64_list.value
-    start_indexes = top_k_indices(result.start_logits,n_best_size,token_map)
-    if len(start_indexes)==0:
-        continue
-    end_indexes   = top_k_indices(result.end_logits,n_best_size,token_map)
-    if len(end_indexes)==0:
-        continue
-    indexes = np.array(list(np.broadcast(start_indexes[None],end_indexes[:,None])))  
-    indexes = indexes[(indexes[:,0]<indexes[:,1])*(indexes[:,1]-indexes[:,0]<max_answer_length)]
-    for i, (start_index,end_index) in enumerate(indexes):
-        summary = tf2baseline.ScoreSummary()
-        summary.short_span_score = (
-            result.start_logits[start_index] +
-            result.end_logits[end_index])
-        summary.cls_token_score = (
-            result.start_logits[0] + result.end_logits[0])
-        summary.answer_type_logits = result.answer_type_logits-result.answer_type_logits.mean()
-        start_span = token_map[start_index]
-        end_span = token_map[end_index] + 1
+            # Span logits minus the cls logits seems to be close to the best.
+            score = summary.short_span_score - summary.cls_token_score
+            predictions.append((score, i, summary, start_span, end_span))
+            i += 1 # to break ties
 
-        # Span logits minus the cls logits seems to be close to the best.
-        score = summary.short_span_score - summary.cls_token_score
-        predictions.append((score, i, summary, start_span, end_span))
+    # Default empty prediction.
+    #score = -10000.0
+    short_span = [Span(-1, -1, -10000.0)]
+    long_span  = [Span(-1, -1, -10000.0)]
+    summary    = ScoreSummary()
 
-  # Default empty prediction.
-  score = -10000.0
-  short_span = tf2baseline.Span(-1, -1)
-  long_span = tf2baseline.Span(-1, -1)
-  summary = tf2baseline.ScoreSummary()
-
-  if predictions:
-    score, _, summary, start_span, end_span = sorted(predictions, reverse=True)[0]
-    short_span = tf2baseline.Span(start_span, end_span)
-    for c in example.candidates:
-      start = short_span.start_token_idx
-      end = short_span.end_token_idx
-      ## print(c['top_level'],c['start_token'],start,c['end_token'],end)
-      if c["top_level"] and c["start_token"] <= start and c["end_token"] >= end:
-        long_span = tf2baseline.Span(c["start_token"], c["end_token"])
-        break
-
-  summary.predicted_label = {
-      "example_id": int(example.example_id),
-      "long_answer": {
-          "start_token": int(long_span.start_token_idx),
-          "end_token": int(long_span.end_token_idx),
+    if predictions:
+        short_span, long_span = get_short_long_span(predictions, example)
+      
+    summary.predicted_label = {
+        "example_id": int(example.example_id),
+        "long_answers": {
+          "tokens_and_score": long_span,
+          #"end_token": long_span,
           "start_byte": -1,
           "end_byte": -1
-      },
-      "long_answer_score": float(score),
-      "short_answers": [{
-          "start_token": int(short_span.start_token_idx),
-          "end_token": int(short_span.end_token_idx),
+        },
+        #"long_answer_score": answer_score,
+        "short_answers": {
+          "tokens_and_score": short_span,
+          #"end_token": short_span,
           "start_byte": -1,
-          "end_byte": -1
-      }],
-      "short_answer_score": float(score),
-      "yes_no_answer": "NONE",
-      "answer_type_logits": summary.answer_type_logits.tolist(),
-      "answer_type": int(np.argmax(summary.answer_type_logits))
-  }
+          "end_byte": -1,
+          "yes_no_answer": "NONE"
+        }
+        #"short_answer_score": answer_scores,
+        
+        #"answer_type_logits": summary.answer_type_logits.tolist(),
+        #"answer_type": int(np.argmax(summary.answer_type_logits))
+       }
 
-  return summary
+    return summary
 
-
-def compute_pred_dict(candidates_dict, dev_features, raw_results):
+def compute_pred_dict(candidates_dict, dev_features, raw_results,tqdm=None):
     """Computes official answer key from raw logits."""
     raw_results_by_id = [(int(res.unique_id),1, res) for res in raw_results]
 
     examples_by_id = [(int(k),0,v) for k, v in candidates_dict.items()]
   
-    features_by_id = [(int(d['unique_ids']),2,d) for d in dev_features] #list(zip(feature_ids, features))
+    features_by_id = [(int(d['unique_id']),2,d) for d in dev_features] 
   
     # Join examples with features and raw results.
     examples = []
@@ -353,195 +386,151 @@ def compute_pred_dict(candidates_dict, dev_features, raw_results):
     print('done.')
     for idx, type_, datum in merged:
         if type_==0: #isinstance(datum, list):
-            examples.append(tf2baseline.EvalExample(idx, datum))
+            examples.append(EvalExample(idx, datum))
         elif type_==2: #"token_map" in datum:
             examples[-1].features[idx] = datum
         else:
             examples[-1].results[idx] = datum
 
     # Construct prediction objects.
-    # tf.logging.info("Computing predictions...")
     print('Computing predictions...')
-    # summary_dict = {}
+   
     nq_pred_dict = {}
-    for e in tqdm.tqdm_notebook(examples):
+    #summary_dict = {}
+    if tqdm is not None:
+        examples = tqdm(examples)
+    for e in examples:
         summary = compute_predictions(e)
-        # summary_dict[e.example_id] = summary
+        #summary_dict[e.example_id] = summary
         nq_pred_dict[e.example_id] = summary.predicted_label
-
     return nq_pred_dict
 
 
-# In[18]:
+def read_candidates_from_one_split(input_path):
+  """Read candidates from a single jsonl file."""
+  candidates_dict = {}
+  print("Reading examples from: %s" % input_path)
+  if input_path.endswith(".gz"):
+    with gzip.GzipFile(fileobj=tf.io.gfile.GFile(input_path, "rb")) as input_file:
+      for index, line in enumerate(input_file):
+        e = json.loads(line)
+        candidates_dict[e["example_id"]] = e["long_answer_candidates"]
+        
+  else:
+    with tf.io.gfile.GFile(input_path, "r") as input_file:
+      for index, line in enumerate(input_file):
+        e = json.loads(line)
+        candidates_dict[e["example_id"]] = e["long_answer_candidates"] # testar juntando com question_text
+  return candidates_dict
 
 
+def read_candidates(input_pattern):
+  """Read candidates with real multiple processes."""
+  input_paths = tf.io.gfile.glob(input_pattern)
+  final_dict = {}
+  for input_path in input_paths:
+    final_dict.update(read_candidates_from_one_split(input_path))
+  return final_dict
 
 all_results = [bert_utils.RawResult(*x) for x in zip(*result)]
-    
 print ("Going to candidates file")
 
-candidates_dict = bert_utils.read_candidates('../input/tensorflow2-question-answering/simplified-nq-test.jsonl')
-
+candidates_dict = read_candidates('./atad/simplified-nq-test.jsonl')
 print ("setting up eval features")
-
 eval_features = list(token_map_ds)
 
 print ("compute_pred_dict")
 
-tqdm_notebook= tqdm.tqdm_notebook if not on_kaggle_server else None
-nq_pred_dict = bert_utils.compute_pred_dict(candidates_dict, 
-                                       eval_features,
-                                       all_results,
-                                      tqdm=tqdm_notebook)
+tqdm_notebook= tqdm.tqdm_notebook
+nq_pred_dict = compute_pred_dict(candidates_dict,
+                                 eval_features,
+                                 all_results,
+                                 tqdm=tqdm_notebook)
 
 predictions_json = {"predictions": list(nq_pred_dict.values())}
-
 print ("writing json")
-
-with tf.io.gfile.GFile('predictions.json', "w") as f:
+with tf.io.gfile.GFile('./predictions.json', "w") as f:
     json.dump(predictions_json, f, indent=4)
+print('writing json done!')
+
+answers_df = pd.read_json("./predictions.json")
+print('answers_df.head(5) is ', answers_df.head(5))
 
 
-# In[19]:
+def df_long_index_score(df):
+    answers = []
+    cont = 0
+    for e in df['long_answers']['tokens_and_score']:
+        # if score > 2
+        if e[2] > 3: 
+            index = {}
+            index['start'] = e[0]
+            index['end'] = e[1]
+            index['score'] = e[2]
+            answers.append(index)
+            cont += 1
+        # number of answers
+        if cont == 1:
+            break
+    return answers
 
+def df_short_index_score(df):
+    answers = []
+    cont = 0
+    for e in df['short_answers']['tokens_and_score']:
+        # if score > 2
+        if e[2] > 8:
+            index = {}
+            index['start'] = e[0]
+            index['end'] = e[1]
+            index['score'] = e[2]
+            answers.append(index)
+            cont += 1
+        # number of answers
+        if cont == 1:
+            break
+    return answers
 
-def create_short_answer(entry):
-    # if entry["short_answer_score"] < 1.5:
-    #     return ""
-    
-    answer = []    
-    for short_answer in entry["short_answers"]:
-        if short_answer["start_token"] > -1:
-            answer.append(str(short_answer["start_token"]) + ":" + str(short_answer["end_token"]))
-    if entry["yes_no_answer"] != "NONE":
-        answer.append(entry["yes_no_answer"])
-    return " ".join(answer)
+def df_example_id(df):
+    return df['example_id']
 
-def create_long_answer(entry):
-   # if entry["long_answer_score"] < 1.5:
-   # return ""
+print('prog get here 666')
+answers_df['example_id'] = answers_df['predictions'].apply(df_example_id)
+answers_df['long_indexes_and_scores'] = answers_df['predictions'].apply(df_long_index_score)
+answers_df['short_indexes_and_scores'] = answers_df['predictions'].apply(df_short_index_score)
+print('answers_df.head(5) is ', answers_df.head(5))
 
+answers_df = answers_df.drop(['predictions'], axis=1)
+
+def create_answer(entry):
     answer = []
-    if entry["long_answer"]["start_token"] > -1:
-        answer.append(str(entry["long_answer"]["start_token"]) + ":" + str(entry["long_answer"]["end_token"]))
-    return " ".join(answer)
+    for e in entry:
+        answer.append(str(e['start']) + ':'+ str(e['end']))
+    if not answer:
+        answer = ""
+    return ", ".join(answer)
 
+print('prog get here 777')
 
-# In[20]:
+answers_df["long_answer"] = answers_df['long_indexes_and_scores'].apply(create_answer)
+answers_df["short_answer"] = answers_df['short_indexes_and_scores'].apply(create_answer)
+answers_df["example_id"] = answers_df['example_id'].apply(lambda q: str(q))
+long_answers = dict(zip(answers_df["example_id"], answers_df["long_answer"]))
+short_answers = dict(zip(answers_df["example_id"], answers_df["short_answer"]))
+answers_df.head()
 
+answers_df = answers_df.drop(['long_indexes_and_scores', 'short_indexes_and_scores'], axis=1)
+answers_df.head()
 
-test_answers_df = pd.read_json("../working/predictions.json")
-for var_name in ['long_answer_score','short_answer_score','answer_type']:
-    test_answers_df[var_name] = test_answers_df['predictions'].apply(lambda q: q[var_name])
-test_answers_df["long_answer"] = test_answers_df["predictions"].apply(create_long_answer)
-test_answers_df["short_answer"] = test_answers_df["predictions"].apply(create_short_answer)
-test_answers_df["example_id"] = test_answers_df["predictions"].apply(lambda q: str(q["example_id"]))
-
-long_answers = dict(zip(test_answers_df["example_id"], test_answers_df["long_answer"]))
-short_answers = dict(zip(test_answers_df["example_id"], test_answers_df["short_answer"]))
-
-
-# In[21]:
-
+print('prog get here 888')
 
 sample_submission = pd.read_csv("../input/tensorflow2-question-answering/sample_submission.csv")
-
 long_prediction_strings = sample_submission[sample_submission["example_id"].str.contains("_long")].apply(lambda q: long_answers[q["example_id"].replace("_long", "")], axis=1)
 short_prediction_strings = sample_submission[sample_submission["example_id"].str.contains("_short")].apply(lambda q: short_answers[q["example_id"].replace("_short", "")], axis=1)
-
 sample_submission.loc[sample_submission["example_id"].str.contains("_long"), "PredictionString"] = long_prediction_strings
 sample_submission.loc[sample_submission["example_id"].str.contains("_short"), "PredictionString"] = short_prediction_strings
 
+sample_submission.to_csv('./mission/submission.csv', index=False)
 
-# In[22]:
-
-
-sample_submission.to_csv("submission.csv", index=False)
-
-
-# In[23]:
-
-
-if public_dataset:
-    print(test_answers_df["long_answer_score"].describe())
-
-
-# In[24]:
-
-
-if public_dataset:
-    print(np.bincount(test_answers_df['answer_type'].values))
-
-
-# In[25]:
-
-
-if public_dataset:
-    print(test_answers_df[test_answers_df['answer_type']==0])
-
-
-# In[26]:
-
-
-if public_dataset:
-    print(test_answers_df.predictions.values[-4])
-
-
-# In[27]:
-
-
-if public_dataset:
-    print(sample_submission.head())
-
-
-# In[28]:
-
-
-class ShowPrediction:
-    def __init__(self,jsonl_file):
-        self._data = {}
-        with open(jsonl_file,'r') as f:
-            for line in f.readlines():
-                d = json.loads(line)
-                #print(d.keys())
-                self._data[int(d['example_id'])]={
-                    'text': d['document_text'],
-                    'question': d['question_text']
-                }
-    def __call__(self,prediction,include_full_text=True):
-        data = self._data[prediction['example_id']]
-        res = {'question': data['question']}
-        if include_full_text:
-            res['text'] = data['text']
-        for type_ in ['long_answer','short_answers']:
-            ans = prediction[type_]
-            if isinstance(ans,list):
-                ans = ans[0]
-            start,end = ans['start_token'],ans['end_token']
-            res[type_] = ' '.join(data['text'].split()[start:end])
-        return res
-
-
-
-# In[29]:
-
-
-if public_dataset:
-    show_pred = ShowPrediction('../input/tensorflow2-question-answering/simplified-nq-test.jsonl')
-
-
-# In[30]:
-
-
-if public_dataset:
-    for pred in test_answers_df.predictions[test_answers_df.answer_type==0]:
-        print(json.dumps(show_pred(pred,include_full_text=True),indent=4))
-
-
-# In[31]:
-
-
-if public_dataset:
-    for pred in np.random.choice(predictions_json['predictions'],10):
-        print(json.dumps(show_pred(pred,include_full_text=False),indent=4))
+print('prog ends here! total cost time: ', time.time() - global_start_t)
 
