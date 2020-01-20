@@ -1,2 +1,4 @@
-# skip the files
+# skip the files and directory
+data/
+atad/
 predictions.json
