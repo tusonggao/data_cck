@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import collections
 import tqdm
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -217,6 +218,7 @@ print('prog ends here 444')
 
 start_t = time.time()
 result = model.predict_generator(ds, verbose=1 if not on_kaggle_server else 0)
+print()
 print('model.predict_generator cost time: ', time.time() - start_t)
 
 print('prog ends here 444.555')
@@ -227,7 +229,6 @@ np.savez_compressed('bert-joint-baseline-output.npz',
 
 print('prog ends here 555')
 #sys.exit(0)
-
 Span = collections.namedtuple("Span", ["start_token_idx", "end_token_idx", "score"])
 
 class ScoreSummary(object):
@@ -456,7 +457,6 @@ print('writing json done!')
 answers_df = pd.read_json("./predictions.json")
 print('answers_df.head(5) is ', answers_df.head(5))
 
-
 def df_long_index_score(df):
     answers = []
     cont = 0
@@ -524,7 +524,7 @@ answers_df.head()
 
 print('prog get here 888')
 
-sample_submission = pd.read_csv("../input/tensorflow2-question-answering/sample_submission.csv")
+sample_submission = pd.read_csv("./atad/sample_submission.csv")
 long_prediction_strings = sample_submission[sample_submission["example_id"].str.contains("_long")].apply(lambda q: long_answers[q["example_id"].replace("_long", "")], axis=1)
 short_prediction_strings = sample_submission[sample_submission["example_id"].str.contains("_short")].apply(lambda q: short_answers[q["example_id"].replace("_short", "")], axis=1)
 sample_submission.loc[sample_submission["example_id"].str.contains("_long"), "PredictionString"] = long_prediction_strings
@@ -533,4 +533,5 @@ sample_submission.loc[sample_submission["example_id"].str.contains("_short"), "P
 sample_submission.to_csv('./mission/submission.csv', index=False)
 
 print('prog ends here! total cost time: ', time.time() - global_start_t)
+
 
