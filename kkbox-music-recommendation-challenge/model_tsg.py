@@ -7,12 +7,18 @@ import time
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv('./atad/train.csv')
-print('df.shape is ', df.shape)
-# df.shape is  (7377418, 6)
+train_df = pd.read_csv('./atad/train.csv')  # df.shape is  (7377418, 6)   df.target 1 ratio is  0.5035170841614234
+print('train_df.shape is ', train_df.shape)
+print('train_df.head(10) is ', train_df.head(10))
+print('train_df.target 1 ratio is ', train_df.target.sum()/len(train_df))
+print('train_df.source_system_tab nunique is ', train_df.target.sum()/len(train_df))
+#source_system_tab,source_screen_name,source_type
 
-print('df.head(10) is ', df.head(10))
 
-print('df.target 1 ratio is ', df.target.sum()/len(df))
-# df.target 1 ratio is  0.5035170841614234
+song_extra_info_df = pd.read_csv('./atad/song_extra_info.csv')
+print('song_extra_info_df.shape is ', song_extra_info_df.shape)
+print('song_extra_info_df.head(10) is ', song_extra_info_df.head(10))
+
+print('hello world!')
+
 
