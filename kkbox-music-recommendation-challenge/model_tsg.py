@@ -17,9 +17,6 @@ print('train_df.source_type nunique is ', train_df['source_type'].nunique())
 #source_system_tab,source_screen_name,source_type
 
 
-#test_df = pd.read_csv('./atad/test.csv')
-#print('test_df.shape is ', test_df.shape)
-
 test_df = pd.read_csv('./atad/test.csv')
 print('test_df.shape is ', test_df.shape)
 
