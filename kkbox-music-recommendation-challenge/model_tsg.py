@@ -17,8 +17,8 @@ print('train_df.source_type nunique is ', train_df['source_type'].nunique())
 #source_system_tab,source_screen_name,source_type
 
 
-test_df = pd.read_csv('./atad/test.csv')
-print('test_df.shape is ', test_df.shape)
+#test_df = pd.read_csv('./atad/test.csv')
+#print('test_df.shape is ', test_df.shape)
 
 members_df = pd.read_csv('./atad/members.csv')
 print('members_df.shape is ', members_df.shape)
@@ -32,6 +32,6 @@ song_extra_info_df = pd.read_csv('./atad/song_extra_info.csv')
 print('song_extra_info_df.shape is ', song_extra_info_df.shape)
 print('song_extra_info_df.head(10) is ', song_extra_info_df.head(10))
 
-print('hello world!')
+#print('hello world!')
 
 
