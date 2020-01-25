@@ -234,6 +234,7 @@ int main() {
 
     init_data();
     //auto assigned_day = read_submission("./mission/submission_672254.028.csv");
+    //
     //auto assigned_day = read_submission("./atad/sample_submission.csv");
     auto assigned_day = read_submission("./mission/submission_69761.84.csv");
     //auto assigned_day = read_submission("./mission/submission_69752.88.csv");

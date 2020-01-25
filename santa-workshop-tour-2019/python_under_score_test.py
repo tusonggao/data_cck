@@ -2,6 +2,7 @@ import numpy as np
 
 def tsg_add(a, b):
     return a + b
+
     
 def _tsg_add_underscore(a, b):
     return a + b
@@ -18,7 +19,6 @@ class A:
  
     def __get_3(self):
         return 3
- 
 
 if __name__=='__main__':
     print(tsg_add(3, 5))
