@@ -67,16 +67,16 @@ def cost_function(prediction, family_size, family_cost_matrix, accounting_cost_m
 
     return np.asarray([penalty, accounting_cost, n_low, n_high])
 
-print('get here 333')
+#print('get here 333')
 
 family_size = family_size.astype(np.int16)
 
 start_t = time.time()
 for i in range(1):
     score = cost_function(prediction, family_size, family_cost_matrix, accounting_cost_matrix)
-print('score is ', score, 'cost time: ', time.time() - start_t)
+#print('score is ', score, 'cost time: ', time.time() - start_t)
 
-print('get here 444')
+#print('get here 444')
 
 
 
