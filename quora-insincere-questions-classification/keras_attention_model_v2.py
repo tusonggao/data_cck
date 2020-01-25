@@ -336,11 +336,11 @@ def train_pred(model, epochs=2):
     pred_test_y = model.predict([test_X], batch_size=1024, verbose=0)
     return pred_val_y, pred_test_y
 
-print('get here 444')
+#print('get here 444')
 start_t = time.time()
 #pred_val_y, pred_test_y = train_pred(model, epochs=15)
 pred_val_y, pred_test_y = train_pred(model, epochs=2)
-print('train_pred cost time time: ', time.time() - start_t)
+#print('train_pred cost time time: ', time.time() - start_t)
 
 '''
 A function specific to this competition since the organizers don't want probabilities 
