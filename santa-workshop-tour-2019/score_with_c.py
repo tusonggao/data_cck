@@ -9,13 +9,12 @@ from tqdm import tqdm_notebook as tqdm
 import ctypes
 from numpy.ctypeslib import ndpointer
 
-def get_all_files(dir_name):   # 递归得到文件夹下的所有文件
+def get_all_files(dir_name):   
     all_files_lst = []
     def get_all_files_worker(path):
         allfilelist = os.listdir(path)
         for file in allfilelist:
             filepath = os.path.join(path, file)
-            #判断是不是文件夹
             if os.path.isdir(filepath):
                 get_all_files_worker(filepath)
             else:

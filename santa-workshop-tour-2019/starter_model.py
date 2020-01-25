@@ -105,7 +105,6 @@ start_score = cost_function(best)
 
 new = best.copy()
 for fam_id, _ in enumerate(best):
-    # loop over each family choice
     for pick in range(10):
         day = choice_dict[f'choice_{pick}'][fam_id]
         temp = new.copy()
@@ -117,5 +116,5 @@ for fam_id, _ in enumerate(best):
 submission['assigned_day'] = new
 score = cost_function(new)
 submission.to_csv(f'submission_{score}.csv')
-print(f'Score: {score}')
-print('total cost time: ', time.time() - start_t_global)
+#print(f'Score: {score}')
+#print('total cost time: ', time.time() - start_t_global)
