@@ -13,7 +13,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from scipy import sparse
 import lightgbm as lgb
 
+#current_path = os.path.split(os.path.realpath(__file__))[0]
 current_path = os.path.split(os.path.realpath(__file__))[0]
+# current_path = './atad/'
 # current_path = 'F:/github_me_repos/data_competition/kdxf2019_mobileAD/'
 os.chdir(current_path)
 
