@@ -6,6 +6,8 @@ import sys
 import time
 import numpy as np
 import pandas as pd
+import lightgbm as lgb
+import tensorflow as tf
 
 train_df = pd.read_csv('./atad/train.csv')  # df.shape is  (7377418, 6)   df.target 1 ratio is  0.5035170841614234
 print('train_df.shape is ', train_df.shape)
@@ -32,6 +34,6 @@ song_extra_info_df = pd.read_csv('./atad/song_extra_info.csv')
 print('song_extra_info_df.shape is ', song_extra_info_df.shape)
 print('song_extra_info_df.head(10) is ', song_extra_info_df.head(10))
 
-print('hello world!')
+#print('hello world!')
 
 
